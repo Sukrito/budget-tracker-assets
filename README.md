@@ -1,24 +1,39 @@
-# Personal AI Finance OS v12.8 Polish
+# Personal AI Finance OS v12.9
 
-## ไฟล์ในชุดนี้
-- `Code_v12_8.gs` ใช้แทน `Code.gs` ใน Apps Script
-- `script_v12_8.js` ใช้แทน `script.js` บน GitHub Pages
+This release focuses on project cleanup, versioning, and maintainability.
 
-## สิ่งที่ปรับ
-- System Check wording ชัดขึ้น: แยก Login, API, Cache, Recent_Index, Sheets
-- แก้การแสดง Read/Write/Admin key: ถ้าใช้ `FINANCE_OS_API_SECRET` fallback จะขึ้น OK (fallback) ไม่ขึ้น Missing แบบทำให้สับสน
-- Sheet status icon ถูกต้องขึ้น โดยใช้ `headerOk / headersOk` ตรงกัน
-- Cache UX แสดง Script Cache, Dashboard_Cache, Cached at, Expires at, TTL
-- Recent_Index health แสดง count และรายการล่าสุด
-- ปุ่ม Reset Login เปลี่ยนเป็น Lock App
-- Add Transaction default เป็น Expenses ถ้ายังไม่ได้เลือกประเภท
+## Files
 
-## วิธีติดตั้ง
-1. Apps Script: วาง `Code_v12_8.gs` แทน `Code.gs`
-2. กด Save
-3. Deploy > Manage deployments > Edit > Version: New version > Deploy
-4. GitHub: วาง `script_v12_8.js` แทน `script.js` แล้ว Commit
-5. เปิดเว็บด้วย `?v=1280`
+- `backend/` — split Google Apps Script backend files.
+- `frontend/script.js` — single frontend JS file for GitHub Pages.
+- `CHANGELOG.md` — release history.
+- `docs/` — deployment and backup documentation.
 
-## หมายเหตุ
-ถ้าใช้เฉพาะ `FINANCE_OS_API_SECRET` ระบบยังทำงานได้ และ System Check จะแสดง `OK (fallback)` สำหรับ Read/Write/Admin
+## Install
+
+1. Copy all files inside `backend/` to Apps Script as separate `.gs` files.
+2. Replace GitHub root `script.js` with `frontend/script.js`.
+3. Deploy Apps Script as New version.
+4. Commit GitHub changes.
+5. Run System Check.
+
+# Changelog
+
+## v12.9.0 — Project Cleanup + Versioning + Changelog
+
+### Added
+- Added `APP_META` in `Config.gs` for backend version tracking.
+- Added `VersionService.gs` with `getVersionInfo_()`.
+- Added `version` API action.
+- Added backend version output to `health` and `systemCheck`.
+- Added frontend constants `APP_FRONTEND_VERSION` and `APP_RELEASE_LABEL`.
+- Added project documentation files.
+
+### Changed
+- Updated backend header comments from v12.8 to v12.9.
+- Updated summary cache key to `finance_summary_v12_9` to avoid stale cache from older builds.
+- Updated session key storage name to `finance_os_session_secret_v12_9`.
+
+### Notes
+- No major business logic change.
+- This release focuses on maintainability, deploy tracking, and safer future debugging.
