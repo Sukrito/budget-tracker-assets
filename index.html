@@ -8,7 +8,7 @@
     content="width=device-width, initial-scale=1, viewport-fit=cover"
   >
 
-  <title>Budget Tracker</title>
+  <title>Personal AI Finance OS</title>
 
   <!-- iPhone / PWA -->
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -26,152 +26,266 @@
 
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- JS -->
-  <script defer src="script.js"></script>
 </head>
 
-<body class="bg-slate-950 text-white min-h-screen">
+<body class="bg-slate-100 text-slate-900">
 
-  <!-- Background Glow -->
-  <div class="fixed inset-0 overflow-hidden -z-10">
-    <div class="absolute top-[-120px] left-[-120px] w-[300px] h-[300px] bg-cyan-500/20 blur-3xl rounded-full"></div>
-    <div class="absolute bottom-[-120px] right-[-120px] w-[300px] h-[300px] bg-blue-500/20 blur-3xl rounded-full"></div>
+  <!-- APP -->
+  <div id="app" class="min-h-screen">
+
+    <!-- HEADER -->
+    <header
+      class="sticky top-0 z-50 backdrop-blur-xl bg-white/80 border-b border-slate-200"
+    >
+      <div
+        class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between"
+      >
+
+        <div class="flex items-center gap-3">
+
+          <img
+            src="https://cdn.jsdelivr.net/gh/Sukrito/budget-tracker-assets@main/icon-v2.png?v=2"
+            class="w-12 h-12 rounded-2xl shadow-lg"
+          >
+
+          <div>
+
+            <p class="text-xs uppercase tracking-[0.25em] text-cyan-600 font-bold">
+              Personal Finance
+            </p>
+
+            <h1 class="text-2xl font-black text-slate-900">
+              Personal AI Finance OS
+            </h1>
+
+            <p class="text-sm text-slate-500">
+              Phase 4.5 • Dashboard Polish
+            </p>
+
+          </div>
+
+        </div>
+
+        <button
+          onclick="refreshAll()"
+          class="px-5 py-2.5 rounded-2xl bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold shadow-lg transition"
+        >
+          Refresh
+        </button>
+
+      </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
+
+      <!-- SUMMARY -->
+      <section
+        class="grid grid-cols-2 md:grid-cols-4 gap-4"
+      >
+
+        <div class="glass-card">
+          <p class="summary-label">ใช้ได้/วัน</p>
+          <h3 id="safeDailySpendText" class="summary-value text-indigo-600">
+            0 ฿
+          </h3>
+        </div>
+
+        <div class="glass-card">
+          <p class="summary-label">สถานะแผน</p>
+          <h3 id="planStatusText" class="summary-value text-emerald-600">
+            0/0
+          </h3>
+        </div>
+
+        <div class="glass-card">
+          <p class="summary-label">Emergency</p>
+          <h3 id="emergencyRateText" class="summary-value text-cyan-600">
+            0%
+          </h3>
+        </div>
+
+        <div class="glass-card">
+          <p class="summary-label">FCF Rate</p>
+          <h3 id="fcfRateText" class="summary-value text-amber-600">
+            0%
+          </h3>
+        </div>
+
+      </section>
+
+      <!-- CASHFLOW -->
+      <section class="grid md:grid-cols-2 gap-5">
+
+        <div class="income-card">
+          <p class="cashflow-label">
+            รายรับจริงรอบนี้
+          </p>
+
+          <h2 id="incomeText" class="cashflow-value">
+            0 ฿
+          </h2>
+        </div>
+
+        <div class="expense-card">
+          <p class="cashflow-label">
+            รายจ่ายจริงรอบนี้
+          </p>
+
+          <h2 id="expenseText" class="cashflow-value">
+            0 ฿
+          </h2>
+        </div>
+
+        <div class="saving-card">
+          <p class="cashflow-label">
+            เงินออมรอบนี้
+          </p>
+
+          <h2 id="savingText" class="cashflow-value">
+            0 ฿
+          </h2>
+        </div>
+
+        <div class="invest-card">
+          <p class="cashflow-label">
+            ลงทุนรอบนี้
+          </p>
+
+          <h2 id="investText" class="cashflow-value">
+            0 ฿
+          </h2>
+        </div>
+
+      </section>
+
+      <!-- DAILY CONTROL -->
+      <section class="dashboard-card">
+
+        <div class="flex items-start justify-between gap-4">
+
+          <div>
+
+            <p class="section-label">
+              Daily Control Panel
+            </p>
+
+            <h2
+              id="dailyControlText"
+              class="text-5xl font-black tracking-tight text-indigo-700 mt-2"
+            >
+              0 ฿
+            </h2>
+
+            <p class="text-slate-500 mt-2">
+              ใช้ได้ต่อวันแบบไม่ให้แผนแตก
+            </p>
+
+          </div>
+
+          <div
+            id="dailyStatusBadge"
+            class="status-badge bg-emerald-100 text-emerald-700"
+          >
+            ใช้จ่ายได้ตามแผน
+          </div>
+
+        </div>
+
+        <!-- Progress -->
+        <div class="mt-6">
+
+          <div
+            class="w-full h-4 bg-slate-200 rounded-full overflow-hidden"
+          >
+            <div
+              id="dailyProgressBar"
+              class="h-full bg-gradient-to-r from-cyan-500 to-indigo-600 rounded-full transition-all duration-500"
+              style="width: 0%"
+            ></div>
+          </div>
+
+          <div class="flex justify-between mt-2 text-sm text-slate-500">
+            <span>0%</span>
+            <span id="dailyProgressText">0%</span>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- RECENT -->
+      <section class="dashboard-card">
+
+        <div class="flex items-center justify-between mb-5">
+
+          <div>
+
+            <p class="section-label">
+              Recent Transactions
+            </p>
+
+            <h2 class="text-2xl font-black">
+              กิจกรรมล่าสุด
+            </h2>
+
+          </div>
+
+        </div>
+
+        <div
+          id="recentTransactionList"
+          class="space-y-3"
+        >
+          <!-- JS Render -->
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- BOTTOM NAV -->
+    <nav
+      class="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white/90 backdrop-blur-xl"
+    >
+
+      <div
+        class="max-w-4xl mx-auto grid grid-cols-5"
+      >
+
+        <button class="bottom-nav-item active">
+          <span>🏠</span>
+          <span>Home</span>
+        </button>
+
+        <button class="bottom-nav-item">
+          <span>➕</span>
+          <span>Add</span>
+        </button>
+
+        <button class="bottom-nav-item">
+          <span>📋</span>
+          <span>Plan</span>
+        </button>
+
+        <button class="bottom-nav-item">
+          <span>📊</span>
+          <span>History</span>
+        </button>
+
+        <button class="bottom-nav-item">
+          <span>⚙️</span>
+          <span>Settings</span>
+        </button>
+
+      </div>
+
+    </nav>
+
   </div>
 
-  <!-- Header -->
-  <header class="sticky top-0 z-50 backdrop-blur-xl bg-slate-900/70 border-b border-white/10">
-    <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-
-      <div>
-        <p class="text-xs uppercase tracking-[0.25em] text-cyan-300">
-          Personal Finance
-        </p>
-
-        <h1 class="text-2xl font-bold">
-          Budget Tracker
-        </h1>
-      </div>
-
-      <button
-        onclick="refreshData()"
-        class="bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-semibold px-4 py-2 rounded-xl transition"
-      >
-        Refresh
-      </button>
-
-    </div>
-  </header>
-
-  <!-- Main -->
-  <main class="max-w-4xl mx-auto px-4 py-6 space-y-6">
-
-    <!-- Balance -->
-    <section class="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl shadow-2xl">
-
-      <p class="text-sm text-slate-400">
-        Current Balance
-      </p>
-
-      <h2 id="balanceText" class="text-4xl font-black mt-2">
-        ฿0
-      </h2>
-
-      <div class="mt-5 grid grid-cols-2 gap-4">
-
-        <div class="bg-emerald-500/10 border border-emerald-400/20 rounded-2xl p-4">
-          <p class="text-sm text-emerald-300">
-            Income
-          </p>
-
-          <p id="incomeText" class="text-2xl font-bold mt-1">
-            ฿0
-          </p>
-        </div>
-
-        <div class="bg-rose-500/10 border border-rose-400/20 rounded-2xl p-4">
-          <p class="text-sm text-rose-300">
-            Expense
-          </p>
-
-          <p id="expenseText" class="text-2xl font-bold mt-1">
-            ฿0
-          </p>
-        </div>
-
-      </div>
-
-    </section>
-
-    <!-- Add Transaction -->
-    <section class="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl shadow-2xl">
-
-      <h3 class="text-xl font-bold mb-5">
-        Add Transaction
-      </h3>
-
-      <div class="space-y-4">
-
-        <input
-          id="titleInput"
-          type="text"
-          placeholder="รายการ"
-          class="w-full bg-slate-900/70 border border-white/10 rounded-2xl px-4 py-3 outline-none focus:border-cyan-400"
-        >
-
-        <input
-          id="amountInput"
-          type="number"
-          placeholder="จำนวนเงิน"
-          class="w-full bg-slate-900/70 border border-white/10 rounded-2xl px-4 py-3 outline-none focus:border-cyan-400"
-        >
-
-        <div class="grid grid-cols-2 gap-4">
-
-          <button
-            onclick="addIncome()"
-            class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-2xl transition"
-          >
-            + Income
-          </button>
-
-          <button
-            onclick="addExpense()"
-            class="bg-rose-500 hover:bg-rose-400 text-white font-bold py-3 rounded-2xl transition"
-          >
-            - Expense
-          </button>
-
-        </div>
-
-      </div>
-
-    </section>
-
-    <!-- Transactions -->
-    <section class="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl shadow-2xl">
-
-      <div class="flex items-center justify-between mb-5">
-
-        <h3 class="text-xl font-bold">
-          Recent Transactions
-        </h3>
-
-        <span class="text-sm text-slate-400">
-          Latest Activity
-        </span>
-
-      </div>
-
-      <div id="transactionList" class="space-y-3">
-
-        <!-- JS Render -->
-
-      </div>
-
-    </section>
-
-  </main>
+  <!-- SCRIPT -->
+  <script defer src="script.js"></script>
 
 </body>
 </html>
