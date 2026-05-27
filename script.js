@@ -3,18 +3,17 @@
 
   // GitHub Pages migration:
   // 1) Deploy Code.gs as Web App.
-  // 2) Paste the /exec URL below. v12.7 Recent_Index + Fast Dashboard Cache
-  const APPS_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbx0YDbMyFs3qSNjcOeCnwjss-oMOsyzeP7_mYZ9X7cEb5oDyJS8krmyWPVDB6sgCbK7/exec';
+  // 2) Paste the /exec URL below. v12.8 Polish: System Check + Login/Cache UX + default Expense
+  const APPS_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbyyRRIhR9FEbIcKXUZX3dkLdgOMEkRR9FxDLICVicmur-eQbk0S06WTZEdPZQwRUMUZ/exec';
 
   const FINANCE_OS_API_KEY_STORAGE = 'finance_os_session_secret_v12_7';
 
+  function getStoredApiKey_() {
+    try { return sessionStorage.getItem(FINANCE_OS_API_KEY_STORAGE) || ''; } catch (e) { return ''; }
+  }
+
   function getApiKey_() {
-    let key = '';
-    try {
-      key = sessionStorage.getItem(FINANCE_OS_API_KEY_STORAGE) || '';
-    } catch (e) {
-      key = '';
-    }
+    let key = getStoredApiKey_();
 
     if (!key) {
       key = window.prompt('ใส่รหัสเข้าใช้งาน Personal AI Finance OS') || '';
@@ -29,7 +28,7 @@
   function resetApiKey() {
     try { sessionStorage.removeItem(FINANCE_OS_API_KEY_STORAGE); } catch (e) {}
     try { localStorage.removeItem('finance_os_api_secret_v1'); } catch (e) {}
-    showToast('ล้างรหัสแล้ว กรุณาใส่ใหม่อีกครั้ง', 'success');
+    showToast('ล็อกแอปแล้ว กรุณา Login ใหม่อีกครั้ง', 'success');
     setTimeout(() => window.location.reload(), 500);
   }
 
@@ -140,7 +139,16 @@
 
   const CLASS_INACTIVE = 'tx-type-label type-option border rounded-xl p-3 text-center cursor-pointer block border-slate-200 text-slate-600 bg-white/70 shadow-sm transition active:scale-95';
 
+  function setDefaultAddType_() {
+    const selected = document.querySelector('input[name="type"]:checked');
+    if (!selected) {
+      const expense = document.querySelector('input[name="type"][value="Expenses"]');
+      if (expense) expense.checked = true;
+    }
+  }
+
   window.addEventListener('DOMContentLoaded', () => {
+    setDefaultAddType_();
     setupAddDateLock_();
     setupPlanEditorListeners_();
     showPage('dashboard');
@@ -177,13 +185,13 @@
       <div class="flex items-start justify-between gap-3">
         <div>
           <h2 class="text-base font-bold text-slate-900">System Check</h2>
-          <p class="text-xs text-slate-500 mt-1">ตรวจ API, Script Properties, Headers, Recent_Index และ Cache</p>
+          <p class="text-xs text-slate-500 mt-1">ตรวจ API, Login, Headers, Recent_Index และ Cache</p>
         </div>
         <span id="system-check-badge" class="text-xs px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">Ready</span>
       </div>
       <div class="grid grid-cols-2 gap-2">
         <button type="button" onclick="runSystemCheck()" class="rounded-xl bg-slate-900 text-white py-2.5 text-sm font-medium active:scale-95 transition">Run Check</button>
-        <button type="button" onclick="resetApiKey()" class="rounded-xl bg-amber-50 text-amber-700 border border-amber-100 py-2.5 text-sm font-medium active:scale-95 transition">Reset Login</button>
+        <button type="button" onclick="resetApiKey()" class="rounded-xl bg-amber-50 text-amber-700 border border-amber-100 py-2.5 text-sm font-medium active:scale-95 transition">Lock App</button>
         <button type="button" onclick="resetFinanceCache()" class="rounded-xl bg-sky-50 text-sky-700 border border-sky-100 py-2.5 text-sm font-medium active:scale-95 transition">Clear Cache</button>
         <button type="button" onclick="rebuildRecentIndex()" class="rounded-xl bg-indigo-50 text-indigo-700 border border-indigo-100 py-2.5 text-sm font-medium active:scale-95 transition">Rebuild Recent</button>
         <button type="button" onclick="refreshEverything()" class="rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-100 py-2.5 text-sm font-medium active:scale-95 transition col-span-2">Full Refresh</button>
@@ -233,9 +241,22 @@
       }
     }
 
+    const api = report.api || {};
+    const cache = report.cache || {};
+    const recent = report.recent || {};
+    const hasSessionKey = !!getStoredApiKey_();
+
+    const keyLine = (label, effective, configured) => {
+      if (configured) return `- ${label}: OK`;
+      if (effective) return `- ${label}: OK (fallback)`;
+      return `- ${label}: Missing`;
+    };
+
     const sheetLines = (report.sheets || []).map(s => {
-      const mark = s.exists && s.headerOk ? '✅' : s.exists ? '⚠️' : '❌';
-      return `${mark} ${s.name}: ${s.rows || 0} rows${s.missingHeaders && s.missingHeaders.length ? ' | missing: ' + s.missingHeaders.join(', ') : ''}`;
+      const ok = !!(s.headerOk || s.headersOk);
+      const mark = s.exists && ok ? '✅' : s.exists ? '⚠️' : '❌';
+      const msg = s.message && s.message !== 'OK' ? ' • ' + s.message : '';
+      return `${mark} ${s.name}: ${s.rows || 0} rows${msg}${s.missingHeaders && s.missingHeaders.length ? ' | headers: ' + s.missingHeaders.join(', ') : ''}`;
     });
 
     const lines = [
@@ -243,14 +264,28 @@
       `Checked: ${report.checkedAt || '-'}`,
       `Elapsed: ${report.elapsedMs || '-'} ms`,
       '',
-      'API:',
-      `- Read key: ${report.api && report.api.readKeyConfigured ? 'OK' : 'Missing'}`,
-      `- Write key: ${report.api && report.api.writeKeyConfigured ? 'OK' : 'Missing'}`,
-      `- Admin key: ${report.api && report.api.adminKeyConfigured ? 'OK' : 'Missing'}`,
-      `- Cache: ${report.api ? report.api.cacheSeconds : '-'} sec`,
+      'Login:',
+      `- Session: ${hasSessionKey ? 'Logged in' : 'Not logged in'}`,
       '',
-      'Recent:',
-      `- Count: ${report.recent ? report.recent.count : '-'}`,
+      'API:',
+      `- Security: ${api.security || '-'}`,
+      `- Split keys: ${api.splitMode ? 'Enabled' : api.fallbackMode ? 'Using FINANCE_OS_API_SECRET fallback' : 'Not configured'}`,
+      keyLine('Read', api.readKeyEffective, api.readKeyConfigured),
+      keyLine('Write', api.writeKeyEffective, api.writeKeyConfigured),
+      keyLine('Admin', api.adminKeyEffective, api.adminKeyConfigured),
+      '',
+      'Cache:',
+      `- Script Cache: ${cache.scriptCache || '-'}`,
+      `- Dashboard_Cache: ${cache.dashboardCacheSheet || '-'} (${cache.dashboardCacheRows || 0} rows)`,
+      `- Cached at: ${cache.dashboardCachedAt || '-'}`,
+      `- Expires at: ${cache.dashboardExpiresAt || '-'}`,
+      `- TTL: ${api.cacheSeconds || '-'} sec`,
+      '',
+      'Recent_Index:',
+      `- Status: ${recent.status || '-'}`,
+      `- Count: ${recent.count || 0}`,
+      `- Last tx date: ${recent.lastTxDate || '-'}`,
+      `- Last created: ${recent.lastCreatedTime || '-'}`,
       '',
       'Sheets:',
       ...sheetLines,
@@ -457,7 +492,7 @@
       systemCategories.Investments = ['Money Market', 'Fund/ETF', 'Other'];
       systemCategories.savingsGoals = ['Emergency Fund 100k'];
       systemCategories.investmentActions = ['Buy', 'DCA', 'Sell', 'Withdraw', 'Dividend', 'Fee'];
-      toggleType('Income');
+      toggleType('Expenses');
       showToast('โหลดหมวดหมู่ไม่สำเร็จ ใช้ค่าเริ่มต้นแทน', 'warning');
     }
   }
@@ -487,12 +522,12 @@
     systemCategories.savingsGoals = cats.savingsGoals && cats.savingsGoals.length ? cats.savingsGoals : ['Emergency Fund 100k'];
     systemCategories.savingsActions = cats.savingsActions && cats.savingsActions.length ? cats.savingsActions : ['Deposit', 'Withdrawal'];
     systemCategories.investmentActions = cats.investmentActions && cats.investmentActions.length ? cats.investmentActions : ['Buy', 'DCA', 'Sell', 'Withdraw', 'Dividend', 'Fee'];
-    toggleType(getSelectedType() || 'Income');
+    toggleType(getSelectedType() || 'Expenses');
   }
 
   function getSelectedType() {
     const selected = document.querySelector('input[name="type"]:checked');
-    return selected ? selected.value : 'Income';
+    return selected ? selected.value : 'Expenses';
   }
 
   function toggleType(type) {
