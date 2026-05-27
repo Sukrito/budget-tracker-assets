@@ -115,8 +115,8 @@
     if (subtitle) subtitle.textContent = PAGE_TITLES[target] || PAGE_TITLES.dashboard;
   
     if (target === 'add') {
-      toggleType('Expenses');
       loadAddTransactionQuickData_();
+      toggleType('Expenses');
   
       setTimeout(() => {
         const amount = document.querySelector('[name="amount"], #amountInput, #txtAmount');
@@ -616,21 +616,41 @@
 
   function updateCategories(type) {
     const categories = systemCategories[type] || [];
-    fillSelect('categorySelect', categories.length ? categories : ['Other']);
+    fillSelect('categorySelect', categories);
   }
 
   function fillSelect(id, items) {
     const select = document.getElementById(id);
     if (!select) return;
+  
     const current = select.value;
+    const list = Array.isArray(items) ? items.filter(Boolean) : [];
+  
+    select.disabled = true;
     select.innerHTML = '';
-    (items || []).forEach(item => {
+  
+    if (!list.length) {
+      const opt = document.createElement('option');
+      opt.value = '';
+      opt.textContent = 'กำลังโหลดหมวดหมู่...';
+      select.appendChild(opt);
+      return;
+    }
+  
+    list.forEach(item => {
       const opt = document.createElement('option');
       opt.value = item;
       opt.textContent = item;
       select.appendChild(opt);
     });
-    if (current && Array.from(select.options).some(o => o.value === current)) select.value = current;
+  
+    if (current && list.includes(current)) {
+      select.value = current;
+    } else {
+      select.selectedIndex = 0;
+    }
+  
+    select.disabled = false;
   }
 
 
