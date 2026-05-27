@@ -3,25 +3,38 @@
 
   // GitHub Pages migration:
   // 1) Deploy Code.gs as Web App.
-  // 2) Paste the /exec URL below.
-  const APPS_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbyHq_D7VcgaFWyWlPZ--qzygauxu7h9gvrDQ-ajreVYEaTR9u6yLaVoBW_o7V3JlhZE/exec';
-  const FINANCE_OS_SECRET_KEY = 'finance_os_session_secret';
-  
-  function getFinanceOsSecret_() {
-    let secret = sessionStorage.getItem(FINANCE_OS_SECRET_KEY);
-  
-    if (!secret) {
-      secret = prompt('ใส่รหัสเข้าใช้งาน Finance OS');
-      if (!secret) throw new Error('ไม่ได้ใส่รหัสเข้าใช้งาน');
-      sessionStorage.setItem(FINANCE_OS_SECRET_KEY, secret);
+  // 2) Paste the /exec URL below. v12.5 stability polish
+  const APPS_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbxRzkukdbDqvWQ7l7_ghPNLUJOSIgCOsvvpzO-zujz2X32YO7jd2bmDQUAS8rRZ1vOA/exec';
+
+  const FINANCE_OS_API_KEY_STORAGE = 'finance_os_session_secret_v12_5';
+
+  function getApiKey_() {
+    let key = '';
+    try {
+      key = sessionStorage.getItem(FINANCE_OS_API_KEY_STORAGE) || '';
+    } catch (e) {
+      key = '';
     }
-  
-    return secret;
+
+    if (!key) {
+      key = window.prompt('ใส่รหัสเข้าใช้งาน Personal AI Finance OS') || '';
+      key = key.trim();
+      if (!key) throw new Error('ยังไม่ได้ใส่รหัสเข้าใช้งาน');
+      try { sessionStorage.setItem(FINANCE_OS_API_KEY_STORAGE, key); } catch (e) {}
+    }
+
+    return key;
   }
-  
+
+  function resetApiKey() {
+    try { sessionStorage.removeItem(FINANCE_OS_API_KEY_STORAGE); } catch (e) {}
+    try { localStorage.removeItem('finance_os_api_secret_v1'); } catch (e) {}
+    showToast('ล้างรหัสแล้ว กรุณาใส่ใหม่อีกครั้ง', 'success');
+    setTimeout(() => window.location.reload(), 500);
+  }
+
   function logoutFinanceOS() {
-    sessionStorage.removeItem(FINANCE_OS_SECRET_KEY);
-    location.reload();
+    resetApiKey();
   }
 
   function assertApiUrl_() {
@@ -30,19 +43,25 @@
     }
   }
 
-  function buildApiUrl_(action, params = {}) {
+  function handleApiPayload_(payload, action) {
+    if (payload && payload.status === 'error') {
+      const msg = payload.message || payload.error || `API ${action} error`;
+      if (/unauthorized|forbidden|secret|รหัส/i.test(msg)) {
+        try { localStorage.removeItem(FINANCE_OS_API_KEY_STORAGE); } catch (e) {}
+      }
+      throw new Error(msg);
+    }
+    return payload;
+  }
+
+  function buildApiUrl_(action, params) {
     assertApiUrl_();
-  
     const url = new URL(APPS_SCRIPT_API_URL);
     url.searchParams.set('action', action);
-    url.searchParams.set('key', getFinanceOsSecret_());
-  
+    url.searchParams.set('key', getApiKey_());
     Object.keys(params || {}).forEach(key => {
-      if (params[key] !== undefined && params[key] !== null) {
-        url.searchParams.set(key, params[key]);
-      }
+      if (params[key] !== undefined && params[key] !== null) url.searchParams.set(key, params[key]);
     });
-  
     return url.toString();
   }
 
@@ -53,26 +72,22 @@
       cache: 'no-store'
     });
     if (!res.ok) throw new Error(`API GET ${action} failed: ${res.status}`);
-    return await res.json();
+    const payload = await res.json();
+    return handleApiPayload_(payload, action);
   }
-  
+
   async function apiPost_(action, data) {
     assertApiUrl_();
-  
     const res = await fetch(APPS_SCRIPT_API_URL, {
       method: 'POST',
       redirect: 'follow',
       cache: 'no-store',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({
-        action,
-        data,
-        key: getFinanceOsSecret_()
-      })
+      body: JSON.stringify({ action, data, key: getApiKey_() })
     });
-  
     if (!res.ok) throw new Error(`API POST ${action} failed: ${res.status}`);
-    return await res.json();
+    const payload = await res.json();
+    return handleApiPayload_(payload, action);
   }
 
   const PAGE_TITLES = {
@@ -94,6 +109,8 @@
     const subtitle = document.getElementById('page-subtitle');
     if (subtitle) subtitle.textContent = PAGE_TITLES[target] || PAGE_TITLES.dashboard;
     if (target === 'add') loadAddTransactionQuickData_();
+    if (target === 'history') loadCycleHistoryLazy_();
+    if (target === 'settings') ensureSettingsToolsPanel_();
     try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { window.scrollTo(0, 0); }
   }
 
@@ -132,9 +149,129 @@
 
   function refreshAll() {
     setRefreshState(true);
+    // Performance v12.5: load only dashboard-critical data on first refresh.
+    // Categories/recent are lazy-loaded when opening Add/History.
+    loadFinancialStatus(() => setRefreshState(false));
+  }
+
+  function refreshEverything() {
+    setRefreshState(true);
     loadCategories();
     loadFinancialStatus(() => setRefreshState(false));
     loadRecentTransactions();
+  }
+
+  function loadCycleHistoryLazy_() {
+    // Cycle history is already embedded in financial summary. This function is a safe hook for future split endpoints.
+    return true;
+  }
+
+  function ensureSettingsToolsPanel_() {
+    const page = document.querySelector('.app-page[data-page="settings"]') || document.getElementById('page-settings');
+    if (!page || document.getElementById('system-check-panel')) return;
+
+    const panel = document.createElement('section');
+    panel.id = 'system-check-panel';
+    panel.className = 'bg-white rounded-2xl shadow-sm border border-slate-100 p-4 mt-4 space-y-3';
+    panel.innerHTML = `
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <h2 class="text-base font-bold text-slate-900">System Check</h2>
+          <p class="text-xs text-slate-500 mt-1">ตรวจ API, Script Properties, Headers, Recent และ Cache</p>
+        </div>
+        <span id="system-check-badge" class="text-xs px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">Ready</span>
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <button type="button" onclick="runSystemCheck()" class="rounded-xl bg-slate-900 text-white py-2.5 text-sm font-medium active:scale-95 transition">Run Check</button>
+        <button type="button" onclick="resetApiKey()" class="rounded-xl bg-amber-50 text-amber-700 border border-amber-100 py-2.5 text-sm font-medium active:scale-95 transition">Reset Login</button>
+        <button type="button" onclick="resetFinanceCache()" class="rounded-xl bg-sky-50 text-sky-700 border border-sky-100 py-2.5 text-sm font-medium active:scale-95 transition">Clear Cache</button>
+        <button type="button" onclick="refreshEverything()" class="rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-100 py-2.5 text-sm font-medium active:scale-95 transition">Full Refresh</button>
+      </div>
+      <div id="system-check-result" class="rounded-xl bg-slate-50 border border-slate-100 p-3 text-xs text-slate-500 whitespace-pre-wrap">ยังไม่ได้ตรวจระบบ</div>
+    `;
+    page.appendChild(panel);
+  }
+
+  async function runSystemCheck() {
+    const result = document.getElementById('system-check-result');
+    const badge = document.getElementById('system-check-badge');
+    if (result) result.textContent = 'กำลังตรวจระบบ...';
+    if (badge) {
+      badge.textContent = 'Checking';
+      badge.className = 'text-xs px-2.5 py-1 rounded-full bg-slate-100 text-slate-600';
+    }
+
+    try {
+      const report = await apiGet_('systemCheck');
+      renderSystemCheckReport_(report);
+    } catch (err) {
+      if (badge) {
+        badge.textContent = 'Error';
+        badge.className = 'text-xs px-2.5 py-1 rounded-full bg-rose-100 text-rose-700';
+      }
+      if (result) result.textContent = 'System Check ล้มเหลว: ' + (err.message || err);
+    }
+  }
+
+  function renderSystemCheckReport_(report) {
+    report = report || {};
+    const result = document.getElementById('system-check-result');
+    const badge = document.getElementById('system-check-badge');
+    const status = report.status || 'unknown';
+
+    if (badge) {
+      if (status === 'success') {
+        badge.textContent = 'OK';
+        badge.className = 'text-xs px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700';
+      } else if (status === 'warning') {
+        badge.textContent = 'Warning';
+        badge.className = 'text-xs px-2.5 py-1 rounded-full bg-amber-100 text-amber-700';
+      } else {
+        badge.textContent = 'Error';
+        badge.className = 'text-xs px-2.5 py-1 rounded-full bg-rose-100 text-rose-700';
+      }
+    }
+
+    const sheetLines = (report.sheets || []).map(s => {
+      const mark = s.exists && s.headerOk ? '✅' : s.exists ? '⚠️' : '❌';
+      return `${mark} ${s.name}: ${s.rows || 0} rows${s.missingHeaders && s.missingHeaders.length ? ' | missing: ' + s.missingHeaders.join(', ') : ''}`;
+    });
+
+    const lines = [
+      `Status: ${status}`,
+      `Checked: ${report.checkedAt || '-'}`,
+      `Elapsed: ${report.elapsedMs || '-'} ms`,
+      '',
+      'API:',
+      `- Read key: ${report.api && report.api.readKeyConfigured ? 'OK' : 'Missing'}`,
+      `- Write key: ${report.api && report.api.writeKeyConfigured ? 'OK' : 'Missing'}`,
+      `- Admin key: ${report.api && report.api.adminKeyConfigured ? 'OK' : 'Missing'}`,
+      `- Cache: ${report.api ? report.api.cacheSeconds : '-'} sec`,
+      '',
+      'Recent:',
+      `- Count: ${report.recent ? report.recent.count : '-'}`,
+      '',
+      'Sheets:',
+      ...sheetLines,
+      '',
+      'Warnings:',
+      ...((report.warnings || []).length ? report.warnings.map(x => '- ' + x) : ['- ไม่มี']),
+      '',
+      'Errors:',
+      ...((report.errors || []).length ? report.errors.map(x => '- ' + x) : ['- ไม่มี'])
+    ];
+
+    if (result) result.textContent = lines.join('\n');
+  }
+
+  async function resetFinanceCache() {
+    try {
+      const res = await apiPost_('resetFinanceCache', {});
+      showToast((res && res.message) || 'ล้าง cache แล้ว', 'success');
+      refreshEverything();
+    } catch (err) {
+      showToast('ล้าง cache ไม่สำเร็จ: ' + (err.message || err), 'error');
+    }
   }
 
   function getTodayLocalDateString() {
