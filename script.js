@@ -3,10 +3,13 @@
 
   // GitHub Pages migration:
   // 1) Deploy Code.gs as Web App.
-  // 2) Paste the /exec URL below. v12.8 Polish: System Check + Login/Cache UX + default Expense
-  const APPS_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbwXA7L4mZyjGwr0Pm_xQv6VgFxTqiymp_X8oLNejoUvgJDhjb6auhR94uJHywVXbPpg/exec';
+  // 2) Paste the /exec URL below. v12.9 Cleanup: Versioning + Changelog + project structure
+  const APPS_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbxvNT8KxDzW8jM6j_JrBqEdJKdAERZrrAtG6ICnx4pEytxiBRAkql5RXTLco7hscxqb/exec';
 
-  const FINANCE_OS_API_KEY_STORAGE = 'finance_os_session_secret_v12_7';
+  const APP_FRONTEND_VERSION = '12.9.0';
+  const APP_RELEASE_LABEL = 'v12.9 Project Cleanup + Versioning + Changelog';
+
+  const FINANCE_OS_API_KEY_STORAGE = 'finance_os_session_secret_v12_9';
 
   function getStoredApiKey_() {
     try { return sessionStorage.getItem(FINANCE_OS_API_KEY_STORAGE) || ''; } catch (e) { return ''; }
@@ -263,6 +266,11 @@
       `Status: ${status}`,
       `Checked: ${report.checkedAt || '-'}`,
       `Elapsed: ${report.elapsedMs || '-'} ms`,
+      '',
+      'Version:',
+      `- Frontend: ${APP_FRONTEND_VERSION}`,
+      `- Backend: ${(report.version && report.version.backendVersion) || '-'}`,
+      `- Release: ${(report.version && report.version.backendLabel) || APP_RELEASE_LABEL}`,
       '',
       'Login:',
       `- Session: ${hasSessionKey ? 'Logged in' : 'Not logged in'}`,
