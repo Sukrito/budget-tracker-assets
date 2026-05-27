@@ -1,0 +1,152 @@
+body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(16, 185, 129, 0.08), transparent 28%),
+        radial-gradient(circle at top right, rgba(99, 102, 241, 0.08), transparent 28%),
+        #f8fafc;
+    }
+    .tap-pop { animation: tapPop 180ms ease-out; }
+    @keyframes tapPop { 0% { transform: scale(0.98); } 55% { transform: scale(1.025); } 100% { transform: scale(1); } }
+    .safe-bottom-space { padding-bottom: max(6rem, env(safe-area-inset-bottom)); }
+    .app-page { display: none; }
+    .app-page.active { display: block; }
+    .bottom-nav-btn.active { background: #0f172a; color: #fff; box-shadow: 0 10px 24px rgba(15,23,42,.16); }
+    .bottom-nav-btn.active span { color: #fff; }
+    .modal-backdrop { backdrop-filter: blur(8px); }
+
+    :root {
+      --glass-bg: rgba(255,255,255,.72);
+      --glass-border: rgba(226,232,240,.72);
+      --ink: #0f172a;
+      --muted: #64748b;
+    }
+    * { -webkit-tap-highlight-color: transparent; }
+    body {
+      min-height: 100dvh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% -8%, rgba(79, 70, 229, 0.16), transparent 30%),
+        radial-gradient(circle at 90% 0%, rgba(14, 165, 233, 0.14), transparent 28%),
+        radial-gradient(circle at 18% 28%, rgba(16, 185, 129, 0.10), transparent 24%),
+        linear-gradient(180deg, #f8fbff 0%, #f3f7fb 42%, #eef4fb 100%);
+    }
+    .app-frame { width: min(100%, 430px); }
+    .ios-header {
+      padding-top: calc(env(safe-area-inset-top) + .85rem);
+      box-shadow: 0 10px 40px rgba(15, 23, 42, .05);
+    }
+    .app-logo {
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      box-shadow: 0 12px 28px rgba(15, 23, 42, .18);
+      overflow: hidden;
+    }
+    .app-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .daily-progress-track {
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.78);
+      border: 1px solid rgba(199,210,254,.65);
+      overflow: hidden;
+      box-shadow: inset 0 1px 3px rgba(15,23,42,.06);
+    }
+    .daily-progress-fill {
+      height: 100%;
+      width: 0%;
+      min-width: 0;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #22c55e, #14b8a6, #6366f1);
+      transition: width .45s ease;
+    }
+    .daily-progress-fill.warning { background: linear-gradient(90deg, #facc15, #f59e0b); }
+    .daily-progress-fill.danger { background: linear-gradient(90deg, #fb7185, #ef4444); }
+    .refresh-pill {
+      width: 44px;
+      height: 44px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      font-size: 1.08rem;
+    }
+    .top-metrics {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: .65rem;
+    }
+    .top-metrics > div {
+      background: var(--glass-bg);
+      border-color: rgba(226,232,240,.82);
+      backdrop-filter: blur(18px);
+      min-height: 64px;
+    }
+    .top-metrics > div:last-child {
+      grid-column: 1 / -1;
+    }
+    @media (min-width: 390px) {
+      .top-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .top-metrics > div:last-child { grid-column: auto; }
+    }
+    .dashboard-shell { background: transparent !important; border: 0 !important; box-shadow: none !important; padding: 0 !important; }
+    .glass-card {
+      background: rgba(255,255,255,.72);
+      border: 1px solid rgba(226,232,240,.78);
+      box-shadow: 0 18px 44px rgba(15, 23, 42, .07);
+      backdrop-filter: blur(20px);
+    }
+    .metric-card {
+      border-radius: 1.35rem !important;
+      padding: 1rem !important;
+      box-shadow: 0 14px 30px rgba(15,23,42,.055);
+    }
+    .metric-card span:first-child { font-weight: 650; letter-spacing: -.01em; }
+    .metric-card [id^="sum-"] { font-size: 1.35rem !important; line-height: 1.15; letter-spacing: -.035em; }
+    .finance-hero {
+      background:
+        linear-gradient(135deg, rgba(238,242,255,.96), rgba(240,249,255,.86) 50%, rgba(236,253,245,.82));
+      border: 1px solid rgba(129,140,248,.22);
+      border-radius: 1.65rem !important;
+      box-shadow: 0 22px 60px rgba(79,70,229,.14);
+      overflow: hidden;
+      position: relative;
+    }
+    .finance-hero::before {
+      content: "";
+      position: absolute;
+      inset: -70px -90px auto auto;
+      width: 170px;
+      height: 170px;
+      border-radius: 999px;
+      background: rgba(99,102,241,.18);
+      filter: blur(6px);
+      pointer-events: none;
+    }
+    .finance-hero #safe-daily-spend {
+      font-size: clamp(2rem, 8vw, 2.65rem) !important;
+      letter-spacing: -.055em;
+      line-height: 1;
+    }
+    .coach-card {
+      background: rgba(255,255,255,.74) !important;
+      border: 1px solid rgba(199,210,254,.55) !important;
+      backdrop-filter: blur(18px);
+    }
+    .section-card {
+      border-radius: 1.55rem !important;
+      box-shadow: 0 16px 42px rgba(15,23,42,.06);
+      backdrop-filter: blur(18px);
+    }
+    .bottom-nav-shell {
+      padding-bottom: max(.75rem, env(safe-area-inset-bottom));
+      box-shadow: 0 -18px 40px rgba(15,23,42,.08);
+    }
+    .bottom-nav-btn { min-height: 58px; }
+    .bottom-nav-btn div { font-size: 1.18rem; line-height: 1.15; }
+    .bottom-nav-btn.active {
+      background: linear-gradient(135deg, #0f172a, #111827) !important;
+      transform: translateY(-1px);
+    }
+    input, select, button { font-size: 16px; }
