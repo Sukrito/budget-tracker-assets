@@ -4,8 +4,25 @@
   // GitHub Pages migration:
   // 1) Deploy Code.gs as Web App.
   // 2) Paste the /exec URL below.
-  const APPS_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbxRzkukdbDqvWQ7l7_ghPNLUJOSIgCOsvvpzO-zujz2X32YO7jd2bmDQUAS8rRZ1vOA/exec';
-  const FINANCE_OS_SECRET = 'FinanceOS-Sukrit-2026-v1';
+  const APPS_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbygHd0_d0FhBVC_dOdJpuPfnrc5u1QcMwCpTqkR6-DsgD8f1Ay0QUjf8RYXQnnZWb5m/exec';
+  const FINANCE_OS_SECRET_KEY = 'finance_os_session_secret';
+  
+  function getFinanceOsSecret_() {
+    let secret = sessionStorage.getItem(FINANCE_OS_SECRET_KEY);
+  
+    if (!secret) {
+      secret = prompt('ใส่รหัสเข้าใช้งาน Finance OS');
+      if (!secret) throw new Error('ไม่ได้ใส่รหัสเข้าใช้งาน');
+      sessionStorage.setItem(FINANCE_OS_SECRET_KEY, secret);
+    }
+  
+    return secret;
+  }
+  
+  function logoutFinanceOS() {
+    sessionStorage.removeItem(FINANCE_OS_SECRET_KEY);
+    location.reload();
+  }
 
   function assertApiUrl_() {
     if (!APPS_SCRIPT_API_URL || APPS_SCRIPT_API_URL.indexOf('PASTE_YOUR') !== -1) {
@@ -18,7 +35,7 @@
   
     const url = new URL(APPS_SCRIPT_API_URL);
     url.searchParams.set('action', action);
-    url.searchParams.set('key', FINANCE_OS_SECRET);
+    url.searchParams.set('key', getFinanceOsSecret_());
   
     Object.keys(params || {}).forEach(key => {
       if (params[key] !== undefined && params[key] !== null) {
@@ -38,16 +55,22 @@
     if (!res.ok) throw new Error(`API GET ${action} failed: ${res.status}`);
     return await res.json();
   }
-
+  
   async function apiPost_(action, data) {
     assertApiUrl_();
+  
     const res = await fetch(APPS_SCRIPT_API_URL, {
       method: 'POST',
       redirect: 'follow',
       cache: 'no-store',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action, data })
+      body: JSON.stringify({
+        action,
+        data,
+        key: getFinanceOsSecret_()
+      })
     });
+  
     if (!res.ok) throw new Error(`API POST ${action} failed: ${res.status}`);
     return await res.json();
   }
