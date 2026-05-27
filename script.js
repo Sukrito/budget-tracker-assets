@@ -3,10 +3,10 @@
 
   // GitHub Pages migration:
   // 1) Deploy Code.gs as Web App.
-  // 2) Paste the /exec URL below. v12.5 stability polish
-  const APPS_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbxZVCIbK5ek4RWMKIzo6F08JS1fCj75zsDX0KTIxm2KL_OHPazXOVGxKxkRccmP4Gor/exec';
+  // 2) Paste the /exec URL below. v12.7 Recent_Index + Fast Dashboard Cache
+  const APPS_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbw7GmqUxUOpIHmtYkeoolqR9-rlxStXVDM6ThOc9OxZMAju5I6XF61Np3FmApZYOMvI/exec';
 
-  const FINANCE_OS_API_KEY_STORAGE = 'finance_os_session_secret_v12_5';
+  const FINANCE_OS_API_KEY_STORAGE = 'finance_os_session_secret_v12_7';
 
   function getApiKey_() {
     let key = '';
@@ -91,8 +91,8 @@
   }
 
   const PAGE_TITLES = {
-    dashboard: 'Phase 4.5 • Dashboard Polish',
-    add: 'Phase 4.5 • Add + Recent',
+    dashboard: 'Phase 4.5 • Dashboard Fast Cache',
+    add: 'Phase 4.5 • Add + Recent Index',
     plan: 'Phase 4.5 • Plan Polish',
     history: 'Phase 4.5 • History Insight',
     settings: 'Phase 4.5 • More & Settings'
@@ -108,7 +108,7 @@
     });
     const subtitle = document.getElementById('page-subtitle');
     if (subtitle) subtitle.textContent = PAGE_TITLES[target] || PAGE_TITLES.dashboard;
-    if (target === 'add' && !ADD_QUICK_DATA_LOADED) {loadAddTransactionQuickData_();}
+    if (target === 'add') loadAddTransactionQuickData_();
     if (target === 'history') loadCycleHistoryLazy_();
     if (target === 'settings') ensureSettingsToolsPanel_();
     try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { window.scrollTo(0, 0); }
@@ -149,6 +149,8 @@
 
   function refreshAll() {
     setRefreshState(true);
+    // Performance v12.5: load only dashboard-critical data on first refresh.
+    // Categories/recent are lazy-loaded when opening Add/History.
     loadFinancialStatus(() => setRefreshState(false));
   }
 
@@ -175,7 +177,7 @@
       <div class="flex items-start justify-between gap-3">
         <div>
           <h2 class="text-base font-bold text-slate-900">System Check</h2>
-          <p class="text-xs text-slate-500 mt-1">ตรวจ API, Script Properties, Headers, Recent และ Cache</p>
+          <p class="text-xs text-slate-500 mt-1">ตรวจ API, Script Properties, Headers, Recent_Index และ Cache</p>
         </div>
         <span id="system-check-badge" class="text-xs px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">Ready</span>
       </div>
@@ -183,7 +185,8 @@
         <button type="button" onclick="runSystemCheck()" class="rounded-xl bg-slate-900 text-white py-2.5 text-sm font-medium active:scale-95 transition">Run Check</button>
         <button type="button" onclick="resetApiKey()" class="rounded-xl bg-amber-50 text-amber-700 border border-amber-100 py-2.5 text-sm font-medium active:scale-95 transition">Reset Login</button>
         <button type="button" onclick="resetFinanceCache()" class="rounded-xl bg-sky-50 text-sky-700 border border-sky-100 py-2.5 text-sm font-medium active:scale-95 transition">Clear Cache</button>
-        <button type="button" onclick="refreshEverything()" class="rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-100 py-2.5 text-sm font-medium active:scale-95 transition">Full Refresh</button>
+        <button type="button" onclick="rebuildRecentIndex()" class="rounded-xl bg-indigo-50 text-indigo-700 border border-indigo-100 py-2.5 text-sm font-medium active:scale-95 transition">Rebuild Recent</button>
+        <button type="button" onclick="refreshEverything()" class="rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-100 py-2.5 text-sm font-medium active:scale-95 transition col-span-2">Full Refresh</button>
       </div>
       <div id="system-check-result" class="rounded-xl bg-slate-50 border border-slate-100 p-3 text-xs text-slate-500 whitespace-pre-wrap">ยังไม่ได้ตรวจระบบ</div>
     `;
@@ -266,9 +269,22 @@
     try {
       const res = await apiPost_('resetFinanceCache', {});
       showToast((res && res.message) || 'ล้าง cache แล้ว', 'success');
-      refreshEverything();
+      refreshAll();
     } catch (err) {
       showToast('ล้าง cache ไม่สำเร็จ: ' + (err.message || err), 'error');
+    }
+  }
+
+
+  async function rebuildRecentIndex() {
+    try {
+      const res = await apiPost_('rebuildRecentIndex', { limit: 200 });
+      showToast((res && res.message) || 'สร้าง Recent_Index ใหม่แล้ว', 'success');
+      ADD_QUICK_DATA_LOADED = false;
+      loadRecentTransactions();
+      runSystemCheck();
+    } catch (err) {
+      showToast('สร้าง Recent_Index ไม่สำเร็จ: ' + (err.message || err), 'error');
     }
   }
 
