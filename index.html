@@ -2,290 +2,659 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, viewport-fit=cover"
-  >
-
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Personal AI Finance OS</title>
-
-  <!-- iPhone / PWA -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0f172a">
-
-  <!-- App Icon -->
-  <link
-    rel="apple-touch-icon"
-    href="https://cdn.jsdelivr.net/gh/Sukrito/budget-tracker-assets@main/icon-v2.png?v=2"
-  >
-
-  <!-- CSS -->
-  <link rel="stylesheet" href="styles.css">
-
-  <!-- Tailwind -->
+  <link rel="apple-touch-icon" href="https://cdn.jsdelivr.net/gh/Sukrito/budget-tracker-assets@main/icon-v2.png?v=2">
+  <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/Sukrito/budget-tracker-assets@main/icon-v2.png?v=2">
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(16, 185, 129, 0.08), transparent 28%),
+        radial-gradient(circle at top right, rgba(99, 102, 241, 0.08), transparent 28%),
+        #f8fafc;
+    }
+    .tap-pop { animation: tapPop 180ms ease-out; }
+    @keyframes tapPop { 0% { transform: scale(0.98); } 55% { transform: scale(1.025); } 100% { transform: scale(1); } }
+    .safe-bottom-space { padding-bottom: max(6rem, env(safe-area-inset-bottom)); }
+    .app-page { display: none; }
+    .app-page.active { display: block; }
+    .bottom-nav-btn.active { background: #0f172a; color: #fff; box-shadow: 0 10px 24px rgba(15,23,42,.16); }
+    .bottom-nav-btn.active span { color: #fff; }
+    .modal-backdrop { backdrop-filter: blur(8px); }
+
+    :root {
+      --glass-bg: rgba(255,255,255,.72);
+      --glass-border: rgba(226,232,240,.72);
+      --ink: #0f172a;
+      --muted: #64748b;
+    }
+    * { -webkit-tap-highlight-color: transparent; }
+    body {
+      min-height: 100dvh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% -8%, rgba(79, 70, 229, 0.16), transparent 30%),
+        radial-gradient(circle at 90% 0%, rgba(14, 165, 233, 0.14), transparent 28%),
+        radial-gradient(circle at 18% 28%, rgba(16, 185, 129, 0.10), transparent 24%),
+        linear-gradient(180deg, #f8fbff 0%, #f3f7fb 42%, #eef4fb 100%);
+    }
+    .app-frame { width: min(100%, 430px); }
+    .ios-header {
+      padding-top: calc(env(safe-area-inset-top) + .85rem);
+      box-shadow: 0 10px 40px rgba(15, 23, 42, .05);
+    }
+    .app-logo {
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      box-shadow: 0 12px 28px rgba(15, 23, 42, .18);
+      overflow: hidden;
+    }
+    .app-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .daily-progress-track {
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.78);
+      border: 1px solid rgba(199,210,254,.65);
+      overflow: hidden;
+      box-shadow: inset 0 1px 3px rgba(15,23,42,.06);
+    }
+    .daily-progress-fill {
+      height: 100%;
+      width: 0%;
+      min-width: 0;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #22c55e, #14b8a6, #6366f1);
+      transition: width .45s ease;
+    }
+    .daily-progress-fill.warning { background: linear-gradient(90deg, #facc15, #f59e0b); }
+    .daily-progress-fill.danger { background: linear-gradient(90deg, #fb7185, #ef4444); }
+    .refresh-pill {
+      width: 44px;
+      height: 44px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      font-size: 1.08rem;
+    }
+    .top-metrics {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: .65rem;
+    }
+    .top-metrics > div {
+      background: var(--glass-bg);
+      border-color: rgba(226,232,240,.82);
+      backdrop-filter: blur(18px);
+      min-height: 64px;
+    }
+    .top-metrics > div:last-child {
+      grid-column: 1 / -1;
+    }
+    @media (min-width: 390px) {
+      .top-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .top-metrics > div:last-child { grid-column: auto; }
+    }
+    .dashboard-shell { background: transparent !important; border: 0 !important; box-shadow: none !important; padding: 0 !important; }
+    .glass-card {
+      background: rgba(255,255,255,.72);
+      border: 1px solid rgba(226,232,240,.78);
+      box-shadow: 0 18px 44px rgba(15, 23, 42, .07);
+      backdrop-filter: blur(20px);
+    }
+    .metric-card {
+      border-radius: 1.35rem !important;
+      padding: 1rem !important;
+      box-shadow: 0 14px 30px rgba(15,23,42,.055);
+    }
+    .metric-card span:first-child { font-weight: 650; letter-spacing: -.01em; }
+    .metric-card [id^="sum-"] { font-size: 1.35rem !important; line-height: 1.15; letter-spacing: -.035em; }
+    .finance-hero {
+      background:
+        linear-gradient(135deg, rgba(238,242,255,.96), rgba(240,249,255,.86) 50%, rgba(236,253,245,.82));
+      border: 1px solid rgba(129,140,248,.22);
+      border-radius: 1.65rem !important;
+      box-shadow: 0 22px 60px rgba(79,70,229,.14);
+      overflow: hidden;
+      position: relative;
+    }
+    .finance-hero::before {
+      content: "";
+      position: absolute;
+      inset: -70px -90px auto auto;
+      width: 170px;
+      height: 170px;
+      border-radius: 999px;
+      background: rgba(99,102,241,.18);
+      filter: blur(6px);
+      pointer-events: none;
+    }
+    .finance-hero #safe-daily-spend {
+      font-size: clamp(2rem, 8vw, 2.65rem) !important;
+      letter-spacing: -.055em;
+      line-height: 1;
+    }
+    .coach-card {
+      background: rgba(255,255,255,.74) !important;
+      border: 1px solid rgba(199,210,254,.55) !important;
+      backdrop-filter: blur(18px);
+    }
+    .section-card {
+      border-radius: 1.55rem !important;
+      box-shadow: 0 16px 42px rgba(15,23,42,.06);
+      backdrop-filter: blur(18px);
+    }
+    .bottom-nav-shell {
+      padding-bottom: max(.75rem, env(safe-area-inset-bottom));
+      box-shadow: 0 -18px 40px rgba(15,23,42,.08);
+    }
+    .bottom-nav-btn { min-height: 58px; }
+    .bottom-nav-btn div { font-size: 1.18rem; line-height: 1.15; }
+    .bottom-nav-btn.active {
+      background: linear-gradient(135deg, #0f172a, #111827) !important;
+      transform: translateY(-1px);
+    }
+    input, select, button { font-size: 16px; }
+
+  </style>
 </head>
-
-<body class="bg-slate-100 text-slate-900">
-
-  <!-- APP -->
-  <div id="app" class="min-h-screen">
-
-    <!-- HEADER -->
-    <header
-      class="sticky top-0 z-50 backdrop-blur-xl bg-white/80 border-b border-slate-200"
-    >
-      <div
-        class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between"
-      >
-
-        <div class="flex items-center gap-3">
-
-          <img
-            src="https://cdn.jsdelivr.net/gh/Sukrito/budget-tracker-assets@main/icon-v2.png?v=2"
-            class="w-12 h-12 rounded-2xl shadow-lg"
-          >
-
-          <div>
-
-            <p class="text-xs uppercase tracking-[0.25em] text-cyan-600 font-bold">
-              Personal Finance
-            </p>
-
-            <h1 class="text-2xl font-black text-slate-900">
-              Personal AI Finance OS
-            </h1>
-
-            <p class="text-sm text-slate-500">
-              Phase 4.5 • Dashboard Polish
-            </p>
-
+<body class="min-h-screen px-4 pt-0 pb-4 md:p-8 text-slate-800">
+  <div class="app-frame mx-auto safe-bottom-space">
+    <header class="ios-header mb-5 sticky top-0 z-20 -mx-4 px-4 pb-3 bg-slate-50/78 backdrop-blur-2xl border-b border-white/70">
+      <div class="flex items-start justify-between gap-3">
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <div class="app-logo w-10 h-10 rounded-2xl text-white grid place-items-center shadow-sm"><img src="data:image/png;base64,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" alt="Budget Tracker icon"></div>
+            <div class="min-w-0">
+              <h1 class="text-xl font-bold text-slate-900 tracking-tight truncate">Personal AI Finance OS</h1>
+              <p id="page-subtitle" class="text-xs text-slate-400 mt-0.5 truncate">Phase 4.5 • App Structure & Financial Intelligence</p>
+            </div>
           </div>
-
         </div>
-
-        <button
-          onclick="refreshAll()"
-          class="px-5 py-2.5 rounded-2xl bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold shadow-lg transition"
-        >
-          Refresh
-        </button>
-
+        <button id="refresh-button" type="button" onclick="refreshAll()" class="refresh-pill shrink-0 bg-white/85 border border-slate-200 text-slate-700 hover:bg-slate-50 active:scale-95 shadow-sm transition" aria-label="Refresh">↻</button>
+      </div>
+      <div class="top-metrics mt-4">
+        <div class="rounded-2xl bg-white/85 border border-slate-100 px-3 py-2 shadow-sm"><span class="block text-xs text-slate-500">ใช้ได้/วัน</span><span id="top-safe-daily" class="block text-sm font-bold text-indigo-700">-</span></div>
+        <div class="rounded-2xl bg-white/85 border border-slate-100 px-3 py-2 shadow-sm"><span class="block text-xs text-slate-500">สถานะแผน</span><span id="top-plan-status" class="block text-sm font-bold text-emerald-700 truncate">-</span></div>
+        <div class="rounded-2xl bg-white/85 border border-slate-100 px-3 py-2 shadow-sm"><span class="block text-xs text-slate-500">Emergency</span><span id="top-emergency-progress" class="block text-sm font-bold text-sky-700">-</span></div>
       </div>
     </header>
 
-    <!-- MAIN -->
-    <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
-
-      <!-- SUMMARY -->
-      <section
-        class="grid grid-cols-2 md:grid-cols-4 gap-4"
-      >
-
-        <div class="glass-card">
-          <p class="summary-label">ใช้ได้/วัน</p>
-          <h3 id="safeDailySpendText" class="summary-value text-indigo-600">
-            0 ฿
-          </h3>
+    <main id="page-dashboard" data-page="dashboard" class="app-page active space-y-4">
+      <div class="dashboard-shell space-y-4">
+        <section class="grid grid-cols-2 gap-4 mb-4 scroll-mt-32">
+        <div class="metric-card bg-emerald-50/80 border border-emerald-100 rounded-xl">
+          <span class="text-xs text-emerald-600 block mb-1">รายรับจริงรอบนี้</span>
+          <span id="sum-income" class="text-lg font-semibold text-emerald-700">Loading...</span>
         </div>
-
-        <div class="glass-card">
-          <p class="summary-label">สถานะแผน</p>
-          <h3 id="planStatusText" class="summary-value text-emerald-600">
-            0/0
-          </h3>
+        <div class="metric-card bg-rose-50/80 border border-rose-100 rounded-xl">
+          <span class="text-xs text-rose-600 block mb-1">รายจ่ายจริงรอบนี้</span>
+          <span id="sum-expense" class="text-lg font-semibold text-rose-700">Loading...</span>
         </div>
-
-        <div class="glass-card">
-          <p class="summary-label">Emergency</p>
-          <h3 id="emergencyRateText" class="summary-value text-cyan-600">
-            0%
-          </h3>
+        <div class="metric-card bg-sky-50/80 border border-sky-100 rounded-xl">
+          <span class="text-xs text-sky-600 block mb-1">เงินออมรอบนี้</span>
+          <span id="sum-savings" class="text-lg font-semibold text-sky-700">Loading...</span>
         </div>
-
-        <div class="glass-card">
-          <p class="summary-label">FCF Rate</p>
-          <h3 id="fcfRateText" class="summary-value text-amber-600">
-            0%
-          </h3>
+        <div class="metric-card bg-violet-50/80 border border-violet-100 rounded-xl">
+          <span class="text-xs text-violet-600 block mb-1">ลงทุนรอบนี้</span>
+          <span id="sum-investments" class="text-lg font-semibold text-violet-700">Loading...</span>
         </div>
-
       </section>
 
-      <!-- CASHFLOW -->
-      <section class="grid md:grid-cols-2 gap-5">
-
-        <div class="income-card">
-          <p class="cashflow-label">
-            รายรับจริงรอบนี้
-          </p>
-
-          <h2 id="incomeText" class="cashflow-value">
-            0 ฿
-          </h2>
-        </div>
-
-        <div class="expense-card">
-          <p class="cashflow-label">
-            รายจ่ายจริงรอบนี้
-          </p>
-
-          <h2 id="expenseText" class="cashflow-value">
-            0 ฿
-          </h2>
-        </div>
-
-        <div class="saving-card">
-          <p class="cashflow-label">
-            เงินออมรอบนี้
-          </p>
-
-          <h2 id="savingText" class="cashflow-value">
-            0 ฿
-          </h2>
-        </div>
-
-        <div class="invest-card">
-          <p class="cashflow-label">
-            ลงทุนรอบนี้
-          </p>
-
-          <h2 id="investText" class="cashflow-value">
-            0 ฿
-          </h2>
-        </div>
-
-      </section>
-
-      <!-- DAILY CONTROL -->
-      <section class="dashboard-card">
-
-        <div class="flex items-start justify-between gap-4">
-
+      <section class="glass-card p-4 rounded-xl mb-4">
+        <div class="flex justify-between items-start gap-3">
           <div>
-
-            <p class="section-label">
-              Daily Control Panel
-            </p>
-
-            <h2
-              id="dailyControlText"
-              class="text-5xl font-black tracking-tight text-indigo-700 mt-2"
-            >
-              0 ฿
-            </h2>
-
-            <p class="text-slate-500 mt-2">
-              ใช้ได้ต่อวันแบบไม่ให้แผนแตก
-            </p>
-
+            <span class="text-xs text-slate-500 block">Free Cash Flow หลังออม/ลงทุน</span>
+            <span id="sum-fcf" class="text-xl font-bold text-slate-900">Loading...</span>
+            <span id="sum-month" class="block text-xs text-slate-400 mt-1"></span>
           </div>
-
-          <div
-            id="dailyStatusBadge"
-            class="status-badge bg-emerald-100 text-emerald-700"
-          >
-            ใช้จ่ายได้ตามแผน
+          <div id="ai-badge" class="text-xs px-2.5 py-1 rounded-full font-medium bg-slate-100 text-slate-600 max-w-[45%] break-words text-right">
+            กำลังโหลด...
           </div>
-
         </div>
-
-        <!-- Progress -->
-        <div class="mt-6">
-
-          <div
-            class="w-full h-4 bg-slate-200 rounded-full overflow-hidden"
-          >
-            <div
-              id="dailyProgressBar"
-              class="h-full bg-gradient-to-r from-cyan-500 to-indigo-600 rounded-full transition-all duration-500"
-              style="width: 0%"
-            ></div>
-          </div>
-
-          <div class="flex justify-between mt-2 text-sm text-slate-500">
-            <span>0%</span>
-            <span id="dailyProgressText">0%</span>
-          </div>
-
-        </div>
-
       </section>
 
-      <!-- RECENT -->
-      <section class="dashboard-card">
 
-        <div class="flex items-center justify-between mb-5">
-
+      <section class="finance-hero p-4 rounded-xl mb-4">
+        <div class="flex items-start justify-between gap-3 mb-3">
           <div>
-
-            <p class="section-label">
-              Recent Transactions
-            </p>
-
-            <h2 class="text-2xl font-black">
-              กิจกรรมล่าสุด
-            </h2>
-
+            <span class="text-xs text-indigo-600 block mb-1">Daily Control Panel</span>
+            <span id="safe-daily-spend" class="text-xl font-bold text-indigo-800">-</span>
+            <span class="block text-xs text-indigo-400 mt-1">ใช้ได้ต่อวันแบบไม่ให้แผนแตก</span>
           </div>
-
+          <div id="daily-status-badge" class="text-xs px-2.5 py-1 rounded-full font-medium bg-indigo-100 text-indigo-700 text-right max-w-[170px]">
+            รอข้อมูลแผน
+          </div>
         </div>
-
-        <div
-          id="recentTransactionList"
-          class="space-y-3"
-        >
-          <!-- JS Render -->
+        <div class="mb-3 rounded-2xl bg-white/55 border border-indigo-100/70 p-3 backdrop-blur">
+          <div class="flex items-center justify-between gap-3 mb-2">
+            <span id="daily-progress-label" class="text-xs font-semibold text-slate-600">Living Budget Progress</span>
+            <span id="daily-progress-percent" class="text-xs font-bold text-indigo-700">-</span>
+          </div>
+          <div class="daily-progress-track">
+            <div id="daily-progress-bar" class="daily-progress-fill"></div>
+          </div>
+          <span id="daily-progress-helper" class="block text-[11px] text-slate-500 mt-2">ติดตามการใช้งบใช้ชีวิตเทียบกับแผนรอบนี้</span>
         </div>
-
+        <div class="grid grid-cols-3 gap-2 text-center">
+          <div class="bg-white/70 rounded-xl p-2 border border-indigo-50">
+            <span class="block text-xs text-slate-500">Days Left</span>
+            <span id="days-left" class="block text-sm font-semibold text-slate-800">-</span>
+          </div>
+          <div class="bg-white/70 rounded-xl p-2 border border-indigo-50">
+            <span class="block text-xs text-slate-500">Plan Flex</span>
+            <span id="plan-flex" class="block text-sm font-semibold text-slate-800">-</span>
+          </div>
+          <div class="bg-white/70 rounded-xl p-2 border border-indigo-50">
+            <span class="block text-xs text-slate-500">After Plan</span>
+            <span id="available-after-plan" class="block text-sm font-semibold text-slate-800">-</span>
+          </div>
+        </div>
+        <div class="coach-card mt-3 rounded-xl bg-white/70 border border-indigo-50 p-3">
+          <span id="coach-primary" class="block text-sm font-semibold text-slate-800">กำลังรอข้อมูลจาก Dashboard</span>
+          <span id="coach-detail" class="block text-xs text-slate-500 mt-1">ระบบดึงข้อมูล Plans, Accounts, Goals และ Pay Cycles มาประมวลผลร่วมกันแบบเรียลไทม์ เพื่อคำนวณงบรายวัน (Safe Daily Spend) และขับเคลื่อนระบบแจ้งเตือนความเสี่ยงผ่านแผ่นป้ายสี AI Coach Badge</span>
+        </div>
       </section>
 
+      
+        <section class="section-card bg-gradient-to-br from-rose-50 via-white to-amber-50 border border-rose-100 rounded-2xl p-4 mb-4 shadow-sm">
+          <div class="flex items-start justify-between gap-3 mb-3">
+            <div><span class="text-xs text-rose-600 font-medium block">Budget Guard</span><h2 class="text-base font-bold text-slate-900">แจ้งเตือนงบใกล้แตก</h2><span id="budget-guard-summary" class="block text-xs text-slate-400 mt-1">กำลังประเมินรายจ่ายและแผนรอบนี้</span></div>
+            <div id="budget-guard-badge" class="text-xs px-2.5 py-1 rounded-full font-medium bg-slate-100 text-slate-600 text-right max-w-[45%] break-words">รอข้อมูล</div>
+          </div>
+          <div id="budget-guard-list" class="space-y-2"><div class="rounded-xl bg-white/75 border border-white/80 p-3 text-xs text-slate-400">กำลังโหลด Budget Guard...</div></div>
+        </section>
+        <section class="section-card bg-gradient-to-br from-sky-50 via-white to-emerald-50 border border-sky-100 rounded-2xl p-4 mb-4 shadow-sm">
+        <div class="flex items-start justify-between gap-3 mb-3">
+          <div>
+            <span class="text-xs text-sky-600 font-medium block">Plan Progress</span>
+            <h2 class="text-base font-bold text-slate-900">แผนรอบเงินเดือนนี้</h2>
+            <span id="plan-tracking-status" class="block text-xs text-slate-400 mt-1">ติดตามว่าแผนสำคัญทำไปถึงไหนแล้ว</span>
+          </div>
+          <div id="plan-progress-badge" class="text-xs px-2.5 py-1 rounded-full font-medium bg-slate-100 text-slate-600 text-right max-w-[160px]">
+            กำลังโหลด...
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-2">
+          <div class="rounded-xl border border-white/80 bg-white/75 p-3 shadow-sm">
+            <div class="flex justify-between gap-2 text-sm">
+              <span class="text-slate-600">Pay Mother</span>
+              <span id="pay-mother-progress-text" class="font-semibold text-slate-900">-</span>
+            </div>
+            <div class="h-2 bg-white rounded-full mt-2 overflow-hidden">
+              <div id="pay-mother-progress-bar" class="h-full bg-rose-400 rounded-full" style="width:0%"></div>
+            </div>
+            <div id="pay-mother-detail" class="text-xs text-slate-500 mt-1">-</div>
+          </div>
+
+          <div class="rounded-xl border border-white/80 bg-white/75 p-3 shadow-sm">
+            <div class="flex justify-between gap-2 text-sm">
+              <span class="text-slate-600">Debt / Bills</span>
+              <span id="debt-bills-progress-text" class="font-semibold text-slate-900">-</span>
+            </div>
+            <div class="h-2 bg-white rounded-full mt-2 overflow-hidden">
+              <div id="debt-bills-progress-bar" class="h-full bg-amber-400 rounded-full" style="width:0%"></div>
+            </div>
+            <div id="debt-bills-detail" class="text-xs text-slate-500 mt-1">-</div>
+          </div>
+
+          <div class="rounded-xl border border-white/80 bg-white/75 p-3 shadow-sm">
+            <div class="flex justify-between gap-2 text-sm">
+              <span class="text-slate-600">Savings</span>
+              <span id="savings-progress-text" class="font-semibold text-slate-900">-</span>
+            </div>
+            <div class="h-2 bg-white rounded-full mt-2 overflow-hidden">
+              <div id="savings-progress-bar" class="h-full bg-sky-400 rounded-full" style="width:0%"></div>
+            </div>
+            <div id="savings-detail" class="text-xs text-slate-500 mt-1">-</div>
+          </div>
+
+          <div class="rounded-xl border border-white/80 bg-white/75 p-3 shadow-sm">
+            <div class="flex justify-between gap-2 text-sm">
+              <span class="text-slate-600">Living Budget</span>
+              <span id="living-progress-text" class="font-semibold text-slate-900">-</span>
+            </div>
+            <div class="h-2 bg-white rounded-full mt-2 overflow-hidden">
+              <div id="living-progress-bar" class="h-full bg-emerald-400 rounded-full" style="width:0%"></div>
+            </div>
+            <div id="living-detail" class="text-xs text-slate-500 mt-1">-</div>
+          </div>
+        </div>
+      </section>
+
+      
+        <section class="grid grid-cols-2 gap-3 mb-6">
+        <div class="bg-gradient-to-br from-emerald-50 to-white border border-emerald-100 rounded-2xl p-3 shadow-sm">
+          <span class="block text-xs text-emerald-600">Emergency Fund</span>
+          <span id="emergency-current" class="block text-sm font-semibold text-slate-800">-</span>
+          <div class="h-2 bg-white rounded-full mt-2 overflow-hidden">
+            <div id="emergency-bar" class="h-full bg-emerald-500 rounded-full" style="width:0%"></div>
+          </div>
+          <span id="emergency-progress" class="block text-xs text-emerald-600 mt-1">-</span>
+        </div>
+        <div class="bg-gradient-to-br from-violet-50 to-white border border-violet-100 rounded-2xl p-3 shadow-sm">
+          <span class="block text-xs text-violet-500">Investment Current</span>
+          <span id="investment-current" class="block text-sm font-semibold text-violet-700">-</span>
+          <span class="block text-xs text-violet-500 mt-1">รวมจากชีต Investments</span>
+        </div>
+      </section>
+
+      
+      </div>
     </main>
 
-    <!-- BOTTOM NAV -->
-    <nav
-      class="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white/90 backdrop-blur-xl"
-    >
+    <main id="page-add" data-page="add" class="app-page space-y-4">
+      <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+        <div class="mb-4"><span class="text-xs text-indigo-600 font-medium block">Add Transaction</span><h2 class="text-lg font-bold text-slate-900">บันทึกรายการใหม่</h2><p class="text-xs text-slate-400 mt-1">รายรับ รายจ่าย เงินออม และการลงทุน</p></div>
+        <form id="txForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-slate-500 mb-1">ประเภทรายการ</label>
+          <div class="grid grid-cols-2 gap-2">
+            <label id="label-income" class="tx-type-label type-option border rounded-xl p-3 text-center cursor-pointer block border-emerald-500 bg-emerald-50/30 text-emerald-700 font-medium shadow-sm transition active:scale-95">
+              <input type="radio" name="type" value="Income" checked class="sr-only" onchange="toggleType('Income')">➕ รายรับ
+            </label>
+            <label id="label-expense" class="tx-type-label type-option border rounded-xl p-3 text-center cursor-pointer block border-slate-200 text-slate-600 bg-white/70 shadow-sm transition active:scale-95">
+              <input type="radio" name="type" value="Expenses" class="sr-only" onchange="toggleType('Expenses')">− รายจ่าย
+            </label>
+            <label id="label-savings" class="tx-type-label type-option border rounded-xl p-3 text-center cursor-pointer block border-slate-200 text-slate-600 bg-white/70 shadow-sm transition active:scale-95">
+              <input type="radio" name="type" value="Savings" class="sr-only" onchange="toggleType('Savings')">💰 เงินออม
+            </label>
+            <label id="label-investments" class="tx-type-label type-option border rounded-xl p-3 text-center cursor-pointer block border-slate-200 text-slate-600 bg-white/70 shadow-sm transition active:scale-95">
+              <input type="radio" name="type" value="Investments" class="sr-only" onchange="toggleType('Investments')">📈 ลงทุน
+            </label>
+          </div>
+        </div>
 
-      <div
-        class="max-w-4xl mx-auto grid grid-cols-5"
-      >
+        <div>
+          <label id="amountLabel" class="block text-xs font-medium text-slate-500 mb-1">จำนวนเงิน (บาท)</label>
+          <input enterkeyhint="done" autocomplete="off" data-number-input="true" pattern="[0-9]*[.,]?[0-9]*" type="text" name="amount" step="any" min="0" inputmode="decimal" required placeholder="0.00" class="w-full text-lg border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+        </div>
 
-        <button class="bottom-nav-item active">
-          <span>🏠</span>
-          <span>Home</span>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1">วันที่</label>
+            <input type="date" name="date" id="txtDate" required class="w-full border border-indigo-100 bg-white/90 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
+              <div class="flex items-center justify-between gap-2 mt-2 rounded-xl border border-slate-100 bg-slate-50/80 px-2.5 py-2">
+                <label class="flex items-center gap-2 text-xs text-slate-600 select-none">
+                  <input id="dateLockToggle" type="checkbox" class="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" onchange="toggleDateLock(this.checked)">
+                  <span>ตรึงวันที่นี้</span>
+                </label>
+                <button type="button" onclick="setAddDateToday()" class="text-xs font-medium text-indigo-600">วันนี้</button>
+              </div>
+              <p id="dateLockHint" class="text-[11px] text-slate-400 mt-1">หลังบันทึก: กลับเป็นวันที่วันนี้</p>
+          </div>
+          <div>
+            <label id="categoryLabel" class="block text-xs font-medium text-slate-500 mb-1">หมวดหมู่</label>
+            <select name="category" id="categorySelect" required class="w-full border border-indigo-100 bg-white/90 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"></select>
+          </div>
+        </div>
+
+        <div id="savingsFields" class="hidden grid-cols-1 sm:grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1">เป้าหมาย</label>
+            <select name="goalName" id="goalNameSelect" class="w-full border border-indigo-100 bg-white/90 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"></select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1">รายการ</label>
+            <select name="action" id="savingsActionSelect" class="w-full border border-indigo-100 bg-white/90 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
+              <option value="Deposit">Deposit</option>
+              <option value="Withdrawal">Withdrawal</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="investmentFields" class="hidden space-y-2">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div>
+              <label class="block text-xs font-medium text-slate-500 mb-1">Action</label>
+              <select name="investmentAction" id="investmentActionSelect" class="w-full border border-indigo-100 bg-white/90 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
+                <option value="Buy">Buy</option>
+                <option value="Sell">Sell</option>
+                <option value="Deposit">Deposit</option>
+                <option value="Withdrawal">Withdrawal</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-500 mb-1">ชื่อสินทรัพย์</label>
+              <input type="text" name="assetName" placeholder="เช่น Money Market, SET50, Gold" class="w-full border border-indigo-100 bg-white/90 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div>
+              <label class="block text-xs font-medium text-slate-500 mb-1">Quantity</label>
+              <input enterkeyhint="done" autocomplete="off" data-number-input="true" pattern="[0-9]*[.,]?[0-9]*" inputmode="decimal" type="text" name="quantity" step="any" min="0" placeholder="Optional" class="w-full border border-indigo-100 bg-white/90 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-500 mb-1">Price</label>
+              <input enterkeyhint="done" autocomplete="off" data-number-input="true" pattern="[0-9]*[.,]?[0-9]*" inputmode="decimal" type="text" name="price" step="any" min="0" placeholder="Optional" class="w-full border border-indigo-100 bg-white/90 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-500 mb-1">บันทึกเพิ่มเติม</label>
+          <input type="text" name="note" placeholder="เช่น เงินเดือน, อาหาร, Emergency Fund, ซื้อกองทุน..." class="w-full border border-slate-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-indigo-500">
+        </div>
+
+        <button type="submit" id="submitBtn" class="w-full bg-slate-900 text-white rounded-xl py-3 font-medium hover:bg-slate-800 active:scale-95 transition-transform duration-150 text-sm disabled:opacity-60 disabled:cursor-not-allowed">
+          บันทึกรายการ
         </button>
+      </form>
 
-        <button class="bottom-nav-item">
-          <span>➕</span>
-          <span>Add</span>
-        </button>
+      <p class="text-xs text-slate-400 mt-4 text-center">ข้อมูลจะถูกบันทึกลง Google Sheets และอัปเดต Dashboard อัตโนมัติ</p>
+      </section>
 
-        <button class="bottom-nav-item">
-          <span>📋</span>
-          <span>Plan</span>
-        </button>
+      <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4">
+        <div class="flex items-start justify-between gap-3 mb-3">
+          <div>
+            <span class="text-xs text-slate-500 block">Recent 3</span>
+            <h2 class="text-base font-bold text-slate-900">รายการล่าสุดหลังบันทึก</h2>
+            <p class="text-xs text-slate-400 mt-1">ใช้เช็กเร็วว่ารายการเข้าระบบแล้ว</p>
+          </div>
+          <button type="button" onclick="loadRecentTransactions()" class="text-xs px-3 py-2 rounded-xl bg-slate-50 border border-slate-100 text-slate-600 active:scale-95 transition">โหลดใหม่</button>
+        </div>
+        <div id="recent-mini-list" class="space-y-2 text-sm text-slate-600">
+          <div class="rounded-xl border border-slate-100 bg-slate-50 px-3 py-3 text-xs text-slate-400">กำลังโหลดรายการล่าสุด...</div>
+        </div>
+      </section>
+    </main>
 
-        <button class="bottom-nav-item">
-          <span>📊</span>
-          <span>History</span>
-        </button>
+    <main id="page-plan" data-page="plan" class="app-page space-y-4">
+      <section class="section-card bg-gradient-to-br from-indigo-50 via-white to-sky-50 border border-indigo-100 rounded-2xl p-4 mb-4 shadow-sm">
+        <div class="flex items-start justify-between gap-3 mb-3">
+          <div>
+            <span class="text-xs text-indigo-600 font-medium block">Plan Editor</span>
+            <h2 class="text-base font-bold text-slate-900">แก้แผนรอบเงินเดือนนี้</h2>
+            <span id="plan-editor-cycle" class="block text-xs text-slate-400 mt-1">ดึงแผนจากชีต Plans</span>
+          </div>
+          <div id="plan-editor-badge" class="text-xs px-2.5 py-1 rounded-full font-medium bg-indigo-100 text-indigo-700 text-right max-w-[45%] break-words">
+            รอข้อมูล
+          </div>
+        </div>
 
-        <button class="bottom-nav-item">
-          <span>⚙️</span>
-          <span>Settings</span>
-        </button>
+        <form id="planEditForm" onsubmit="handlePlanEditSubmit(event)" class="space-y-3 rounded-2xl border border-white/80 bg-white/75 p-3 shadow-sm">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div>
+              <label class="block text-xs font-medium text-slate-500 mb-1">Expected Income <span class="text-slate-400">(บาท)</span></label>
+              <input enterkeyhint="done" autocomplete="off" data-number-input="true" pattern="[0-9]*[.,]?[0-9]*" id="planExpectedIncome" name="expectedIncome" type="text" step="any" min="0" inputmode="decimal" class="w-full border border-indigo-100 bg-white/90 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" placeholder="0">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-500 mb-1">Pay Mother Plan <span class="text-slate-400">(บาท)</span></label>
+              <input enterkeyhint="done" autocomplete="off" data-number-input="true" pattern="[0-9]*[.,]?[0-9]*" id="planPayMother" name="payMother" type="text" step="any" min="0" inputmode="decimal" class="w-full border border-indigo-100 bg-white/90 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" placeholder="0">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-500 mb-1">Debt / Bills Plan <span class="text-slate-400">(บาท)</span></label>
+              <input enterkeyhint="done" autocomplete="off" data-number-input="true" pattern="[0-9]*[.,]?[0-9]*" id="planDebtBills" name="debtBills" type="text" step="any" min="0" inputmode="decimal" class="w-full border border-indigo-100 bg-white/90 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" placeholder="0">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-500 mb-1">Savings Plan <span class="text-slate-400">(บาท)</span></label>
+              <input enterkeyhint="done" autocomplete="off" data-number-input="true" pattern="[0-9]*[.,]?[0-9]*" id="planSavings" name="savingsPlan" type="text" step="any" min="0" inputmode="decimal" class="w-full border border-indigo-100 bg-white/90 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" placeholder="0">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-500 mb-1">Living Budget <span class="text-slate-400">(บาท)</span></label>
+              <input enterkeyhint="done" autocomplete="off" data-number-input="true" pattern="[0-9]*[.,]?[0-9]*" id="planLivingBudget" name="livingBudget" type="text" step="any" min="0" inputmode="decimal" class="w-full border border-indigo-100 bg-white/90 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" placeholder="0">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-500 mb-1">Expected Buffer</label>
+              <div id="planExpectedBufferPreview" class="w-full min-h-[56px] border border-emerald-100 bg-emerald-50/80 rounded-xl px-3 py-2 text-sm font-semibold text-emerald-700 flex flex-col justify-center">-</div>
+            </div>
+          </div>
 
-      </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1">Main Goal</label>
+            <input id="planMainGoal" name="mainGoal" type="text" class="w-full border border-indigo-100 bg-white/90 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" placeholder="เป้าหมายหลักของรอบนี้">
+          </div>
 
-    </nav>
+          <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1">Plan Note</label>
+            <input id="planNote" name="note" type="text" class="w-full border border-indigo-100 bg-white/90 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" placeholder="หมายเหตุแผน">
+          </div>
 
+          <button id="save-plan-button" type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-sky-600 text-white rounded-xl py-3 font-medium active:scale-95 transition-transform shadow-sm">
+            บันทึกแผนรอบนี้
+          </button>
+        </form>
+      </section>
+
+      
+      <section class="section-card bg-gradient-to-br from-amber-50 via-white to-orange-50 border border-amber-100 rounded-2xl p-4 mb-4 shadow-sm">
+        <div class="flex items-start justify-between gap-3 mb-3">
+          <div>
+            <span class="text-xs text-amber-600 font-medium block">Cycle Review</span>
+            <h2 class="text-base font-bold text-slate-900">สรุปรอบเงินเดือนนี้</h2>
+            <span id="cycle-review-status" class="block text-xs text-slate-400 mt-1"><span class="inline-block w-40 h-3 bg-slate-200 rounded animate-pulse"></span></span>
+          </div>
+          <div id="cycle-review-badge" class="text-xs px-2.5 py-1 rounded-full font-medium bg-slate-100 text-slate-600 text-right max-w-[45%] break-words">
+            <span class="inline-block w-16 h-3.5 bg-slate-200 rounded animate-pulse"></span>
+          </div>
+        </div>
+
+        <div class="rounded-xl border border-white/80 bg-white/75 p-3 shadow-sm mb-3">
+          <span id="cycle-review-main" class="block text-sm font-semibold text-slate-800"><span class="inline-block w-44 h-4 bg-slate-200 rounded animate-pulse"></span></span>
+          <span id="cycle-review-recommendation" class="block text-xs text-slate-500 mt-1"><span class="inline-block w-full h-3 bg-slate-200 rounded animate-pulse"></span><span class="inline-block w-3/4 h-3 bg-slate-200 rounded animate-pulse mt-1"></span></span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 text-center mb-3">
+          <div class="rounded-xl border border-slate-100 bg-white p-2.5">
+            <span class="block text-xs text-slate-500">Actual FCF</span>
+            <span id="review-actual-fcf" class="block text-sm font-semibold text-slate-800"><span class="inline-block w-20 h-4 bg-slate-200 rounded animate-pulse"></span></span>
+          </div>
+          <div class="rounded-xl border border-slate-100 bg-white p-2.5">
+            <span class="block text-xs text-slate-500">Expected Buffer</span>
+            <span id="review-expected-buffer" class="block text-sm font-semibold text-slate-800"><span class="inline-block w-20 h-4 bg-slate-200 rounded animate-pulse"></span></span>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <div id="cycle-review-notes" class="text-xs text-slate-500 space-y-1">
+            <div class="rounded-lg bg-slate-50 border border-slate-100 px-3 py-2">
+              <span class="inline-block w-full h-3 bg-slate-200 rounded animate-pulse"></span>
+              <span class="inline-block w-2/3 h-3 bg-slate-200 rounded animate-pulse mt-1"></span>
+            </div>
+            <div class="rounded-lg bg-slate-50 border border-slate-100 px-3 py-2">
+              <span class="inline-block w-5/6 h-3 bg-slate-200 rounded animate-pulse"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      
+      <section class="section-card bg-gradient-to-br from-indigo-50 via-white to-violet-50 border border-indigo-100 rounded-2xl p-4 shadow-sm">
+        <div class="flex items-start justify-between gap-3">
+          <div><span class="text-xs text-indigo-600 font-medium block">Archive Cycle</span><h2 class="text-base font-bold text-slate-900">บันทึกรอบเงินเดือนนี้</h2><span class="block text-xs text-slate-400 mt-1">เก็บ Snapshot เพื่อใช้วิเคราะห์รายเดือน</span></div>
+          <div class="flex flex-col items-end gap-1"><span id="archive-status-badge" class="text-xs px-2.5 py-1 rounded-full font-medium bg-slate-100 text-slate-600">ยังไม่บันทึก</span><button id="archive-cycle-button" type="button" onclick="archiveCurrentCycle()" class="text-xs px-3 py-2 rounded-xl font-medium bg-slate-900 text-white active:scale-95 transition-transform">Archive</button></div>
+        </div>
+      </section>
+    </main>
+
+    <main id="page-history" data-page="history" class="app-page space-y-4">
+      <section class="section-card bg-gradient-to-br from-emerald-50 via-white to-sky-50 border border-emerald-100 rounded-2xl p-4 shadow-sm">
+        <div class="flex items-start justify-between gap-3 mb-3"><div><span class="text-xs text-emerald-600 font-medium block">Monthly Pattern Insight</span><h2 class="text-base font-bold text-slate-900">วิเคราะห์พฤติกรรมรายเดือน</h2><span id="monthly-pattern-summary" class="block text-xs text-slate-400 mt-1">รอข้อมูล Cycle History</span></div><div id="monthly-pattern-badge" class="text-xs px-2.5 py-1 rounded-full font-medium bg-slate-100 text-slate-600 text-right max-w-[45%] break-words">Need 2 Cycles</div></div>
+        <div class="rounded-xl border border-white/80 bg-white/75 p-3 shadow-sm mb-2"><span id="monthly-pattern-title" class="block text-sm font-semibold text-slate-800">Monthly Pattern Insight</span><span id="monthly-pattern-top-category" class="block text-xs text-slate-500 mt-1">-</span></div>
+        <div id="monthly-pattern-notes" class="space-y-2 text-xs text-slate-500"><div class="rounded-lg bg-slate-50 border border-slate-100 px-3 py-2">ยังไม่มีข้อมูลเพียงพอ</div></div>
+      </section>
+      <section class="section-card bg-gradient-to-br from-indigo-50 via-white to-violet-50 border border-indigo-100 rounded-2xl p-4 mb-4 shadow-sm">
+        <div class="flex items-start justify-between gap-3 mb-3">
+          <div>
+            <span class="text-xs text-indigo-600 font-medium block">Cycle History</span>
+            <h2 class="text-base font-bold text-slate-900">ประวัติรอบเงินเดือน</h2>
+            <span class="block text-xs text-slate-400 mt-1">บันทึกสรุปรอบนี้ไว้ดูย้อนหลัง</span>
+          </div>
+          
+        </div>
+
+        <div id="history-insight-card" class="rounded-xl border border-indigo-100 bg-white/80 px-3 py-3 mb-3 shadow-sm min-h-[84px]">
+          <div class="flex items-start justify-between gap-2">
+            <div class="min-w-0">
+              <span class="block text-xs text-slate-500">History Insight</span>
+              <span id="history-insight-title" class="block text-sm font-semibold text-slate-800 mt-0.5"><span class="inline-block w-28 h-4 bg-slate-200 rounded animate-pulse"></span></span>
+              <span id="history-insight-summary" class="block text-xs text-slate-500 mt-1"><span class="inline-block w-full h-3 bg-slate-200 rounded animate-pulse"></span></span>
+            </div>
+            <span id="history-insight-trend" class="shrink-0 text-xs px-2.5 py-1 rounded-full font-medium bg-slate-100 text-slate-600">-</span>
+          </div>
+        </div>
+
+        <div id="cycle-history-list" class="space-y-2">
+          <div class="rounded-xl border border-slate-100 bg-slate-50 px-3 py-3">
+            <span class="inline-block w-full h-3 bg-slate-200 rounded animate-pulse"></span>
+            <span class="inline-block w-2/3 h-3 bg-slate-200 rounded animate-pulse mt-2"></span>
+          </div>
+        </div>
+      </section>
+
+      
+      <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4">
+        <div class="flex items-center justify-between gap-2 mb-3"><div><h2 class="font-semibold text-slate-900 text-sm">รายการล่าสุด</h2><p class="text-xs text-slate-400">แก้ไขหรือลบรายการย้อนหลังได้จากที่นี่</p></div><button type="button" onclick="loadRecentTransactions()" class="text-xs text-slate-500 hover:text-slate-900">โหลดใหม่</button></div>
+        <div id="recent-list" class="space-y-2 text-sm text-slate-600">กำลังโหลด...</div>
+      </section>
+    </main>
+
+    <main id="page-settings" data-page="settings" class="app-page space-y-4">
+      <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+        <span class="text-xs text-slate-500 block">Settings</span>
+        <h2 class="text-lg font-bold text-slate-900">ตั้งค่าระบบ</h2>
+        <p class="text-sm text-slate-500 mt-2">Phase นี้ยังใช้ Settings จาก Google Sheets เดิมก่อน เช่น Categories, Goals, Assets, Plans และ Pay Cycle</p>
+        <button type="button" onclick="refreshAll()" class="mt-4 w-full bg-slate-900 text-white rounded-xl py-3 font-medium active:scale-95 transition-transform">Refresh System Data</button>
+      </section>
+    </main>
   </div>
 
-  <!-- SCRIPT -->
-  <script defer src="script.js"></script>
+  <nav class="bottom-nav-shell fixed bottom-0 left-0 right-0 z-30 px-4 pt-2 bg-slate-50/82 backdrop-blur-2xl border-t border-white/70">
+    <div class="app-frame mx-auto grid grid-cols-5 gap-1 rounded-3xl bg-white/92 border border-slate-100 shadow-lg p-1">
+      <button type="button" data-nav="dashboard" onclick="showPage('dashboard')" class="bottom-nav-btn active rounded-2xl px-2 py-2 text-xs font-medium text-slate-600 transition"><div>⌂</div><span>Home</span></button>
+      <button type="button" data-nav="add" onclick="showPage('add')" class="bottom-nav-btn rounded-2xl px-2 py-2 text-xs font-medium text-slate-600 transition"><div>＋</div><span>Add</span></button>
+      <button type="button" data-nav="plan" onclick="showPage('plan')" class="bottom-nav-btn rounded-2xl px-2 py-2 text-xs font-medium text-slate-600 transition"><div>▤</div><span>Plan</span></button>
+      <button type="button" data-nav="history" onclick="showPage('history')" class="bottom-nav-btn rounded-2xl px-2 py-2 text-xs font-medium text-slate-600 transition"><div>▥</div><span>History</span></button>
+      <button type="button" data-nav="settings" onclick="showPage('settings')" class="bottom-nav-btn rounded-2xl px-2 py-2 text-xs font-medium text-slate-600 transition"><div>⚙</div><span>More</span></button>
+    </div>
+  </nav>
 
+  <div id="editTxModal" class="hidden fixed inset-0 z-40 modal-backdrop bg-slate-900/40 px-4 py-6 overflow-y-auto">
+    <div class="max-w-md mx-auto bg-white rounded-3xl shadow-xl border border-slate-100 p-5">
+      <div class="flex items-start justify-between gap-3 mb-4"><div><span class="text-xs text-indigo-600 font-medium block">Edit Transaction</span><h2 class="text-lg font-bold text-slate-900">แก้ไขรายการย้อนหลัง</h2><p id="editTxMeta" class="text-xs text-slate-400 mt-1">-</p></div><button type="button" onclick="closeEditTransactionModal()" class="w-9 h-9 rounded-xl bg-slate-100 text-slate-500">✕</button></div>
+      <form id="editTxForm" onsubmit="handleEditTransactionSubmit(event)" class="space-y-3">
+        <input type="hidden" id="editTxId" name="transactionId">
+        <input type="hidden" id="editTxType" name="type">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2"><div><label class="block text-xs font-medium text-slate-500 mb-1">วันที่</label><input id="editTxDate" name="date" type="date" required class="w-full border border-indigo-100 bg-white/90 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"></div><div><label class="block text-xs font-medium text-slate-500 mb-1">จำนวนเงิน</label><input enterkeyhint="done" autocomplete="off" data-number-input="true" pattern="[0-9]*[.,]?[0-9]*" inputmode="decimal" id="editTxAmount" name="amount" type="text" step="any" min="0" required class="w-full border border-indigo-100 bg-white/90 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"></div></div>
+        <div><label class="block text-xs font-medium text-slate-500 mb-1">หมวดหมู่</label><input id="editTxCategory" name="category" type="text" required class="w-full border border-indigo-100 bg-white/90 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"></div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2"><div><label class="block text-xs font-medium text-slate-500 mb-1">Item / Goal / Asset</label><input id="editTxItem" name="item" type="text" list="editTxItemOptions" class="w-full border border-indigo-100 bg-white/90 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"><datalist id="editTxItemOptions"></datalist><p id="editTxItemHint" class="text-[11px] text-slate-400 mt-1">เลือกชื่อให้ตรงกับชนิดรายการ</p></div><div><label class="block text-xs font-medium text-slate-500 mb-1">Action</label><select id="editTxAction" name="action" class="w-full border border-indigo-100 bg-white/90 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"></select><p id="editTxActionHint" class="text-[11px] text-slate-400 mt-1">ระบบจะกัน Action ที่ไม่ตรงประเภท</p></div></div>
+        <div><label class="block text-xs font-medium text-slate-500 mb-1">บันทึกเพิ่มเติม</label><input id="editTxNote" name="note" type="text" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"></div>
+        <div class="grid grid-cols-2 gap-2 pt-2"><button type="button" onclick="closeEditTransactionModal()" class="rounded-xl py-3 bg-slate-100 text-slate-600 font-medium active:scale-95 transition">ยกเลิก</button><button id="editTxSaveButton" type="submit" class="rounded-xl py-3 bg-slate-900 text-white font-medium active:scale-95 transition">บันทึกการแก้ไข</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast" class="hidden"></div>
+  <script src="script.js" defer></script>
 </body>
 </html>
