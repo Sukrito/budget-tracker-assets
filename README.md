@@ -1,48 +1,24 @@
-# Personal AI Finance OS v12.7
+# Personal AI Finance OS v12.8 Polish
 
-## เป้าหมาย
-แก้ปัญหา Home และ Recent โหลดช้า โดยเพิ่ม:
+## ไฟล์ในชุดนี้
+- `Code_v12_8.gs` ใช้แทน `Code.gs` ใน Apps Script
+- `script_v12_8.js` ใช้แทน `script.js` บน GitHub Pages
 
-1. `Recent_Index` sheet
-   - หน้าเว็บอ่านรายการล่าสุดจากชีต index โดยตรง
-   - ไม่ต้อง scan `Income`, `Expenses`, `Savings`, `Investments` ทุกครั้ง
-   - หลังบันทึกรายการใหม่ ระบบ prepend รายการเข้า `Recent_Index`
-   - หลังแก้/ลบรายการ ระบบ rebuild index ใหม่
-
-2. Fast Dashboard Cache
-   - ใช้ `CacheService` ก่อน
-   - เพิ่ม `Dashboard_Cache` sheet เป็น persistent cache 5 นาที
-   - ช่วยให้ Home โหลดเร็วขึ้นเมื่อ Apps Script cache หมดแต่ cache sheet ยังไม่หมดอายุ
-
-3. System Check เพิ่มเติม
-   - ตรวจ `Recent_Index`
-   - ตรวจ `Dashboard_Cache`
-   - ปุ่ม `Rebuild Recent`
-   - ปุ่ม `Clear Cache` จะ refresh เฉพาะ Dashboard ไม่โหลดทุกอย่างพร้อมกัน
+## สิ่งที่ปรับ
+- System Check wording ชัดขึ้น: แยก Login, API, Cache, Recent_Index, Sheets
+- แก้การแสดง Read/Write/Admin key: ถ้าใช้ `FINANCE_OS_API_SECRET` fallback จะขึ้น OK (fallback) ไม่ขึ้น Missing แบบทำให้สับสน
+- Sheet status icon ถูกต้องขึ้น โดยใช้ `headerOk / headersOk` ตรงกัน
+- Cache UX แสดง Script Cache, Dashboard_Cache, Cached at, Expires at, TTL
+- Recent_Index health แสดง count และรายการล่าสุด
+- ปุ่ม Reset Login เปลี่ยนเป็น Lock App
+- Add Transaction default เป็น Expenses ถ้ายังไม่ได้เลือกประเภท
 
 ## วิธีติดตั้ง
-
-### Apps Script
-1. เปิด Apps Script
-2. แทนที่ `Code.gs` ด้วย `Code_v12_7.gs`
-3. กด Save
-4. Deploy > Manage deployments > Edit
-5. Version: New version
-6. Deploy
-
-### GitHub
-1. แทนที่ `script.js` ด้วย `script_v12_7.js`
-2. ตรวจว่า `APPS_SCRIPT_API_URL` เป็น `/exec` URL ล่าสุด
-3. Commit changes
-4. เปิดเว็บด้วย query ใหม่ เช่น `?v=1270`
-
-## หลังติดตั้ง
-1. เข้า More / Settings
-2. กด Run Check
-3. กด Rebuild Recent หนึ่งครั้ง
-4. กด Full Refresh
+1. Apps Script: วาง `Code_v12_8.gs` แทน `Code.gs`
+2. กด Save
+3. Deploy > Manage deployments > Edit > Version: New version > Deploy
+4. GitHub: วาง `script_v12_8.js` แทน `script.js` แล้ว Commit
+5. เปิดเว็บด้วย `?v=1280`
 
 ## หมายเหตุ
-- ถ้าข้อมูล Home ครั้งแรกยังช้า ให้กดครั้งถัดไปใหม่ จะใช้ cache 5 นาที
-- ถ้าแก้ข้อมูลใน Google Sheets โดยตรง ไม่ผ่านหน้าเว็บ ให้กด Rebuild Recent เพื่อซิงก์ index
-- ถ้าข้อมูล Dashboard ไม่อัปเดต ให้กด Clear Cache
+ถ้าใช้เฉพาะ `FINANCE_OS_API_SECRET` ระบบยังทำงานได้ และ System Check จะแสดง `OK (fallback)` สำหรับ Read/Write/Admin
