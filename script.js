@@ -4,7 +4,7 @@
   // GitHub Pages migration:
   // 1) Deploy Code.gs as Web App.
   // 2) Paste the /exec URL below.
-  const APPS_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbxmBVQcSxh73e8R4iO_5Y_E9hQLaYO7z4Bw7BjfRAuzbsM9OaeFR5IrR7639UvBycXT/exec';
+  const APPS_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycby-CoPbrsY-P-Fbil3PeL4ZyGHdJQUSJh1mqtL8ibmVqXfmsVR89LyPuhTQ5UR-Hzkk/exec';
 
   function assertApiUrl_() {
     if (!APPS_SCRIPT_API_URL || APPS_SCRIPT_API_URL.indexOf('PASTE_YOUR') !== -1) {
