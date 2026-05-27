@@ -5,6 +5,7 @@
   // 1) Deploy Code.gs as Web App.
   // 2) Paste the /exec URL below.
   const APPS_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbxRzkukdbDqvWQ7l7_ghPNLUJOSIgCOsvvpzO-zujz2X32YO7jd2bmDQUAS8rRZ1vOA/exec';
+  const FINANCE_OS_SECRET = 'FinanceOS-Sukrit-2026-v1';
 
   function assertApiUrl_() {
     if (!APPS_SCRIPT_API_URL || APPS_SCRIPT_API_URL.indexOf('PASTE_YOUR') !== -1) {
@@ -12,13 +13,19 @@
     }
   }
 
-  function buildApiUrl_(action, params) {
+  function buildApiUrl_(action, params = {}) {
     assertApiUrl_();
+  
     const url = new URL(APPS_SCRIPT_API_URL);
     url.searchParams.set('action', action);
+    url.searchParams.set('key', FINANCE_OS_SECRET);
+  
     Object.keys(params || {}).forEach(key => {
-      if (params[key] !== undefined && params[key] !== null) url.searchParams.set(key, params[key]);
+      if (params[key] !== undefined && params[key] !== null) {
+        url.searchParams.set(key, params[key]);
+      }
     });
+  
     return url.toString();
   }
 
