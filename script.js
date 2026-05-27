@@ -4,7 +4,7 @@
   // GitHub Pages migration:
   // 1) Deploy Code.gs as Web App.
   // 2) Paste the /exec URL below. v12.7 Recent_Index + Fast Dashboard Cache
-  const APPS_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbwBbiA3ZnaL2dVyZ7HK1Uxfyas0NMnBCpJ3l-2ddK8yIh3zo0uO1rEEF-DJw4TyOTp6/exec';
+  const APPS_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbx0YDbMyFs3qSNjcOeCnwjss-oMOsyzeP7_mYZ9X7cEb5oDyJS8krmyWPVDB6sgCbK7/exec';
 
   const FINANCE_OS_API_KEY_STORAGE = 'finance_os_session_secret_v12_7';
 
