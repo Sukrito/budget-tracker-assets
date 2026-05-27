@@ -394,7 +394,16 @@
           </div>
           <div>
             <label id="categoryLabel" class="block text-xs font-medium text-slate-500 mb-1">หมวดหมู่</label>
-            <select name="category" id="categorySelect" required class="w-full border border-indigo-100 bg-white/90 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"></select>
+            <select
+              name="category"
+              id="categorySelect"
+              required
+              disabled
+              autocomplete="off"
+              class="w-full border border-indigo-100 bg-white/90 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-wait"
+            >
+              <option value="">กำลังโหลดหมวดหมู่...</option>
+            </select>
           </div>
         </div>
 
