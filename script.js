@@ -102,18 +102,36 @@
 
   function showPage(page) {
     const target = page || 'dashboard';
+  
     document.querySelectorAll('.app-page').forEach(el => {
       el.classList.toggle('active', el.dataset.page === target);
     });
+  
     document.querySelectorAll('.bottom-nav-btn').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.nav === target);
     });
+  
     const subtitle = document.getElementById('page-subtitle');
     if (subtitle) subtitle.textContent = PAGE_TITLES[target] || PAGE_TITLES.dashboard;
-    if (target === 'add') loadAddTransactionQuickData_();
+  
+    if (target === 'add') {
+      toggleType('Expenses');
+      loadAddTransactionQuickData_();
+  
+      setTimeout(() => {
+        const amount = document.querySelector('[name="amount"], #amountInput, #txtAmount');
+        if (amount) amount.focus();
+      }, 250);
+    }
+  
     if (target === 'history') loadCycleHistoryLazy_();
     if (target === 'settings') ensureSettingsToolsPanel_();
-    try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { window.scrollTo(0, 0); }
+  
+    try {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (e) {
+      window.scrollTo(0, 0);
+    }
   }
 
   let systemCategories = {
