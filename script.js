@@ -4,7 +4,7 @@
   // GitHub Pages migration:
   // 1) Deploy Code.gs as Web App.
   // 2) Paste the /exec URL below.
-  const APPS_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbzdffenyQ0aiSYf8SFNKIcSWRtJ4wcPrql6cbHFXA6uNNqFBiyuFb_T2CA1y9B6R19M/exec';
+  const APPS_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbyHq_D7VcgaFWyWlPZ--qzygauxu7h9gvrDQ-ajreVYEaTR9u6yLaVoBW_o7V3JlhZE/exec';
   const FINANCE_OS_SECRET_KEY = 'finance_os_session_secret';
   
   function getFinanceOsSecret_() {
