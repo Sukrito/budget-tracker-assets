@@ -108,7 +108,7 @@
     });
     const subtitle = document.getElementById('page-subtitle');
     if (subtitle) subtitle.textContent = PAGE_TITLES[target] || PAGE_TITLES.dashboard;
-    if (target === 'add') loadAddTransactionQuickData_();
+    if (target === 'add' && !ADD_QUICK_DATA_LOADED) {loadAddTransactionQuickData_();}
     if (target === 'history') loadCycleHistoryLazy_();
     if (target === 'settings') ensureSettingsToolsPanel_();
     try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { window.scrollTo(0, 0); }
@@ -149,8 +149,6 @@
 
   function refreshAll() {
     setRefreshState(true);
-    // Performance v12.5: load only dashboard-critical data on first refresh.
-    // Categories/recent are lazy-loaded when opening Add/History.
     loadFinancialStatus(() => setRefreshState(false));
   }
 
