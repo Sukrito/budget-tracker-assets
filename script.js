@@ -525,17 +525,21 @@
 
   async function loadAddTransactionQuickData_(force) {
     if (ADD_QUICK_DATA_LOADED && !force) return;
+  
     try {
       const res = await apiGet_('getAddTransactionQuickData');
       ADD_QUICK_DATA_LOADED = true;
+  
       if (!res || res.status === 'error') return;
+  
       if (res.categories) applyCategories_(res.categories);
-      if (res.recent) {
-        renderRecentMiniTransactions(res.recent);
-        renderRecentTransactions(res.recent);
-      }
+  
+      // ให้หน้า Add ใช้ recent จาก endpoint เต็ม เพื่อจำนวนรายการตรงกันเสมอ
+      loadRecentTransactions();
+  
     } catch (err) {
       console.warn('Quick Add data failed', err);
+      loadRecentTransactions();
     }
   }
 
