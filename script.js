@@ -4,7 +4,7 @@
   // GitHub Pages migration:
   // 1) Deploy Code.gs as Web App.
   // 2) Paste the /exec URL below. v12.8 Polish: System Check + Login/Cache UX + default Expense
-  const APPS_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbyyRRIhR9FEbIcKXUZX3dkLdgOMEkRR9FxDLICVicmur-eQbk0S06WTZEdPZQwRUMUZ/exec';
+  const APPS_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbwXA7L4mZyjGwr0Pm_xQv6VgFxTqiymp_X8oLNejoUvgJDhjb6auhR94uJHywVXbPpg/exec';
 
   const FINANCE_OS_API_KEY_STORAGE = 'finance_os_session_secret_v12_7';
 
