@@ -242,12 +242,12 @@ Use this if `script.js` has a bug visible to the user.
 
 ## Version Reference
 
-| Field | Location | Current value (v12.9.1) |
+| Field | Location | Current value (v13.0.0) |
 |---|---|---|
-| Backend version | `Config.js` → `APP_META.BACKEND_VERSION` | `12.9.1` |
-| Backend label | `Config.js` → `APP_META.BACKEND_LABEL` | `v12.9.1 Bug fixes: zero-balance display, goal validation, API log status` |
+| Backend version | `Config.js` → `APP_META.BACKEND_VERSION` | `13.0.0` |
+| Backend label | `Config.js` → `APP_META.BACKEND_LABEL` | `v13.0.0 Frontend refresh consistency: default categories, full refreshAll reload` |
 | Release date | `Config.js` → `APP_META.RELEASE_DATE` | `2026-05-28` |
-| Cache key | `Config.js` → `API_SECURITY.SUMMARY_CACHE_KEY` | `finance_summary_v12_9_1` |
-| Frontend version | `script.js` → `APP_FRONTEND_VERSION` | `12.9.0` (frontend unchanged) |
+| Cache key | `Config.js` → `API_SECURITY.SUMMARY_CACHE_KEY` | `finance_summary_v13_0_0` |
+| Frontend version | `script.js` → `APP_FRONTEND_VERSION` | `13.0.0` |
 
 All five backend fields must be updated together on every backend release.

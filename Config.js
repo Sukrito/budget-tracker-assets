@@ -1,11 +1,11 @@
 /*******************************************************
- * Personal AI Finance OS v12.9 Split Backend
+ * Personal AI Finance OS v13.0 Split Backend
  * File: Config.gs
  * Google Apps Script shares global scope across .gs files.
  *******************************************************/
 
 /*******************************************************
- * Personal AI Finance OS - Google Apps Script Backend v12.9
+ * Personal AI Finance OS - Google Apps Script Backend v13.0
  * Supports: Income, Expenses, Savings, Investments + Phase 4 App Upgrade
  * Phase 4 includes: Budget Guard, Edit/Delete Transactions, Monthly Pattern Insight
  * Phase 4.6 UI Polish: mobile-first dashboard payload compatible with SaaS-style UX
@@ -14,6 +14,7 @@
  * v12.7.1: System Check hotfix
  * v12.8: System Check polish + clearer key/cache/recent diagnostics
  * v12.9: Project cleanup + versioning + changelog
+ * v13.0: Frontend refresh consistency — default categories, full refreshAll reload
  *
  * GitHub Pages frontend:
  * - index.html
@@ -24,9 +25,9 @@
 
 const APP_META = {
   NAME: 'Personal AI Finance OS',
-  BACKEND_VERSION: '12.9.1',
-  BACKEND_LABEL: 'v12.9.1 Bug fixes: zero-balance display, goal validation, API log status',
-  FRONTEND_EXPECTED_VERSION: '12.9.0',
+  BACKEND_VERSION: '13.0.0',
+  BACKEND_LABEL: 'v13.0.0 Frontend refresh consistency: default categories, full refreshAll reload',
+  FRONTEND_EXPECTED_VERSION: '13.0.0',
   RELEASE_DATE: '2026-05-28',
   BUILD_CHANNEL: 'GitHub Pages + Apps Script',
 };
@@ -174,7 +175,7 @@ const API_SECURITY = {
   WRITE_ACTIONS: ['recordTransaction', 'updateCurrentPlan'],
   ADMIN_ACTIONS: ['archiveCurrentCycle', 'updateTransaction', 'deleteTransaction', 'resetFinanceCache', 'rebuildRecentIndex'],
 
-  SUMMARY_CACHE_KEY: 'finance_summary_v12_9_1',
+  SUMMARY_CACHE_KEY: 'finance_summary_v13_0_0',
   SUMMARY_CACHE_SECONDS: 300,
   RECENT_SCAN_LIMIT: 0, // 0 = scan all used rows for correctness; set 500/1000 later if sheets get huge
 };

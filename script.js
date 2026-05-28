@@ -6,7 +6,7 @@
   // 2) Paste the /exec URL below. v12.9 Cleanup: Versioning + Changelog + project structure
   const APPS_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbxvNT8KxDzW8jM6j_JrBqEdJKdAERZrrAtG6ICnx4pEytxiBRAkql5RXTLco7hscxqb/exec';
 
-  const APP_FRONTEND_VERSION = '12.9.0';
+  const APP_FRONTEND_VERSION = '13.0.0';
   const APP_RELEASE_LABEL = 'v12.9 Project Cleanup + Versioning + Changelog';
 
   const FINANCE_OS_API_KEY_STORAGE = 'finance_os_session_secret_v12_9';
