@@ -4,7 +4,7 @@
   // GitHub Pages migration:
   // 1) Deploy Code.gs as Web App.
   // 2) Paste the /exec URL below. v12.9 Cleanup: Versioning + Changelog + project structure
-  const APPS_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbwQJKFhDaJi3V0aIqeFBFgu931so2GZxo5PUYurfud31ZEtI4bxGFb5kwLIWVMFijS3/exec';
+  const APPS_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbybLbUj-jbW4QzJjeVPjveY99iwbjjhF30gmjnD74tBJqK68Q-09h9cNE_51-NRaqof/exec';
 
   const APP_FRONTEND_VERSION = '13.0.0';
   const APP_RELEASE_LABEL = 'v12.9 Project Cleanup + Versioning + Changelog';
