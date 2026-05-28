@@ -1,0 +1,24 @@
+# Git / local repo files
+.git/**
+.gitignore
+.claspignore
+.clasp.json
+.DS_Store
+
+# Claude / documentation
+CLAUDE.md
+docs/**
+README.md
+README_MIGRATION_TH.md
+
+# Assets not used by Apps Script runtime
+icon.png
+icon-v2.png
+
+# Local / dependency files
+node_modules/**
+.env
+.clasprc.json
+
+# Not part of Apps Script project
+styles.css
