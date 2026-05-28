@@ -24,10 +24,10 @@
 
 const APP_META = {
   NAME: 'Personal AI Finance OS',
-  BACKEND_VERSION: '12.9.0',
-  BACKEND_LABEL: 'v12.9 Project Cleanup + Versioning + Changelog',
+  BACKEND_VERSION: '12.9.1',
+  BACKEND_LABEL: 'v12.9.1 Bug fixes: zero-balance display, goal validation, API log status',
   FRONTEND_EXPECTED_VERSION: '12.9.0',
-  RELEASE_DATE: '2026-05-27',
+  RELEASE_DATE: '2026-05-28',
   BUILD_CHANNEL: 'GitHub Pages + Apps Script',
 };
 
@@ -174,7 +174,7 @@ const API_SECURITY = {
   WRITE_ACTIONS: ['recordTransaction', 'updateCurrentPlan'],
   ADMIN_ACTIONS: ['archiveCurrentCycle', 'updateTransaction', 'deleteTransaction', 'resetFinanceCache', 'rebuildRecentIndex'],
 
-  SUMMARY_CACHE_KEY: 'finance_summary_v12_9',
+  SUMMARY_CACHE_KEY: 'finance_summary_v12_9_1',
   SUMMARY_CACHE_SECONDS: 300,
   RECENT_SCAN_LIMIT: 0, // 0 = scan all used rows for correctness; set 500/1000 later if sheets get huge
 };
