@@ -164,6 +164,12 @@ There is no test runner. Use this manual sequence before every production deploy
 11. Run System Check from the Settings page.
 12. Check the browser console for any JavaScript errors.
 
+**Additional checks introduced in v12.9.1 (run after any change to SummaryService, TransactionService, or Code.js):**
+
+13. **Zero-balance account display** — if the Accounts sheet has a Cash or Investment row, set its Current Balance to `0`, reset the cache, reload the dashboard. The displayed value must be `0`, not a fallback computation. Restore afterward.
+14. **Goal validation** — record a Savings transaction with a goalName that is not in the Goals sheet. The API must return `status: 'error'` and write no row. Record the same transaction with a valid goalName — it must succeed.
+15. **API log accuracy** — call `updateTransaction` or `deleteTransaction` with an invalid transaction ID. Open `ApiLogs` and confirm the entry shows status `error`, not `success`.
+
 ---
 
 ## Recovery Procedures

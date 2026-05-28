@@ -54,7 +54,10 @@ parseLocalDate_(data.date)            ← strict yyyy-MM-dd parsing
 Route by data.type:
   "Income"      → write to Income sheet
   "Expenses"    → write to Expenses sheet
-  "Savings"     → write to Savings sheet
+  "Savings"     → validate goalName against Goals sheet  ← added v12.9.1
+                  throws if goalName not in getGoalNames_()
+                  (guard skipped if Goals sheet has no rows)
+                → write to Savings sheet
   "Investments" → write to Investments sheet
         │
         ▼

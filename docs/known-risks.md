@@ -2,20 +2,24 @@
 
 ## Risk Summary
 
-| ID | Severity | Category | Title |
-|---|---|---|---|
-| R01 | High | Operational | Apps Script 6-minute execution limit |
-| R02 | High | Development | Global namespace collisions in Apps Script |
-| R03 | High | Development | `script.js` syntax error disables the entire frontend |
-| R04 | Medium | Deployment | New deployment creates a new URL, breaking the frontend |
-| R05 | Medium | Operational | Direct sheet edits bypass cache invalidation |
-| R06 | Medium | Operational | `Recent_Index` desyncs when rows are deleted from source sheets |
-| R07 | Medium | Deployment | Version/cache key not bumped after backend deploy |
-| R08 | Medium | Development | No automated tests — regressions are invisible |
-| R09 | Medium | Development | `validateTransaction` mutates its argument silently |
-| R10 | Low | Operational | Holiday fetch has no retry; variable holidays may be missing |
-| R11 | Low | Security | API secret stored in `sessionStorage` |
-| R12 | Low | Development | `cleanText_` passed to `Array.map` receives index as second argument |
+| ID | Severity | Category | Status | Title |
+|---|---|---|---|---|
+| R01 | High | Operational | Open | Apps Script 6-minute execution limit |
+| R02 | High | Development | Open | Global namespace collisions in Apps Script |
+| R03 | High | Development | Open | `script.js` syntax error disables the entire frontend |
+| R04 | Medium | Deployment | Open | New deployment creates a new URL, breaking the frontend |
+| R05 | Medium | Operational | Open | Direct sheet edits bypass cache invalidation |
+| R06 | Medium | Operational | Open | `Recent_Index` desyncs when rows are deleted from source sheets |
+| R07 | Medium | Deployment | Open | Version/cache key not bumped after backend deploy |
+| R08 | Medium | Development | Open | No automated tests — regressions are invisible |
+| R09 | Medium | Development | Open | `validateTransaction` mutates its argument silently |
+| R10 | Low | Operational | Open | Holiday fetch has no retry; variable holidays may be missing |
+| R11 | Low | Security | Open | API secret stored in `sessionStorage` |
+| R12 | Low | Development | Open | `cleanText_` passed to `Array.map` receives index as second argument |
+| R13 | Medium | Operational | Open | `Recent_Index` silently drops the oldest entry on every new transaction once at capacity |
+| R14 | Low | Operational | Open | Zero-net Savings entries are invisible in Recent Transactions |
+| R15 | Medium | Operational | Open | Race condition between `getRecentTransactions` rebuild and a concurrent `recordTransaction` |
+| R16 | Low | Operational | Open | Backdated Savings entries write an incorrect Balance column value |
 
 ---
 
@@ -153,6 +157,50 @@ For personal use on a private device, `sessionStorage` is reasonable — it is c
 When "New deployment" is selected instead of updating an existing deployment, Apps Script generates a new `/exec` URL. The old URL returns a generic error page (not JSON), causing `res.json()` to throw in the frontend. All API calls fail silently from the user's perspective (an error toast appears for each failed action).
 
 **Prevention:** Always use Deploy → Manage deployments → Edit (pencil icon) → New version. See `deployment-workflow.md` — URL Stability section.
+
+---
+
+---
+
+### R13 — `Recent_Index` silently drops the oldest entry on every new transaction once at capacity
+**Severity: Medium**
+
+`prependRecentIndexFromSheetRow_` in `RecentService.js` reads at most 199 existing index rows, prepends the new row, and writes 200 rows back. If the index already holds 200 rows (the maximum written by `rebuildRecentIndex_`), the row at position 200 is never read and is silently overwritten on every subsequent `recordTransaction`.
+
+Over time, the oldest visible entry in the index is perpetually evicted. A full `rebuildRecentIndex` restores the missing entries.
+
+**Mitigation:** Run `rebuildRecentIndex` periodically (e.g. monthly) to ensure the index reflects the full transaction history up to the configured limit. The 200-row cap in `prependRecentIndexFromSheetRow_` could be raised to 200 (matching `rebuildRecentIndex_`) in a future patch.
+
+---
+
+### R14 — Zero-net Savings entries are invisible in Recent Transactions
+**Severity: Low**
+
+A Savings row where `Deposit` equals `Withdrawal` (net amount = 0) is filtered out by the `Number(amount) === 0` guard in both `collectRecentFromSheet_` and `collectRecentRowFromValues_` in `RecentService.js`. The transaction is recorded correctly in the Savings sheet but never appears in the recent list and disappears from the index after any rebuild.
+
+This affects correction entries (equal deposit and withdrawal used to zero out a previous entry).
+
+**Mitigation:** No workaround. Verify a correction entry was written by checking the Savings sheet directly.
+
+---
+
+### R15 — Race condition between `getRecentTransactions` rebuild and a concurrent `recordTransaction`
+**Severity: Medium**
+
+`getRecentTransactions` (called by the standalone `getRecentTransactions` GET action) may trigger `rebuildRecentIndex_` if the index is found empty. This rebuild calls `writeRecentIndexRows_`, which runs `clearContents()` on `Recent_Index`. A concurrent `recordTransaction` holds the document lock and is mid-way through `prependRecentIndexFromSheetRow_`, which also calls `writeRecentIndexRows_`. Because the GET call does not acquire the document lock, the two writes can interleave: the rebuild's `clearContents` may wipe an entry just written by the `recordTransaction`, causing the newly recorded transaction to vanish from the index until the next rebuild.
+
+**Mitigation:** This race is unlikely in personal single-user use. If it occurs, run `rebuildRecentIndex` (admin action) to restore the correct index state.
+
+---
+
+### R16 — Backdated Savings entries write an incorrect Balance column value
+**Severity: Low**
+
+`recordTransaction` for Savings type uses `getSavingsBalanceBefore_`, which sums all existing deposits and withdrawals for the goal without any date filter. If a transaction is recorded with a date earlier than existing rows (a backfill), the Balance stored in the new row equals the grand total including future-dated rows — not the running balance at the backfilled date.
+
+The Balance column is denormalized and is used only by `getSavingsBalanceBefore_` for the next `recordTransaction`. Financial summary calculations (`getGoalStatus_`, FCF) derive balance from the raw `Deposit`/`Withdrawal` columns and are not affected.
+
+**Recovery:** Run `updateTransaction` on any Savings row for the affected goal to trigger `recalculateSavingsBalancesForGoal_`, which repairs all Balance values for that goal in sheet order.
 
 ---
 

@@ -143,6 +143,27 @@ Run within 5 minutes of releasing.
   → cache should now show HIT on next systemCheck
 ```
 
+### v12.9.1 — Additional post-release checks
+
+These verify the three bug fixes shipped in v12.9.1. Run once after the first deploy.
+
+```
+□ Zero-balance account display (Fix 1)
+  → Set a Cash account row's Current Balance to 0 in Accounts sheet
+  → POST resetFinanceCache, reload dashboard
+  → availableCash must show 0, not openingCashBalance + fcf
+  → Restore the original balance afterward
+
+□ Goal validation consistency (Fix 2)
+  → Record a Savings transaction with a goalName not in the Goals sheet
+  → Must return { status: 'error' } — no row written
+  → Record the same transaction with a valid goalName — must succeed
+
+□ API log status accuracy (Fix 3)
+  → Call updateTransaction with a made-up transaction ID
+  → Open ApiLogs sheet — the entry must show status 'error', not 'success'
+```
+
 ---
 
 ## Rollback: Backend
@@ -221,12 +242,12 @@ Use this if `script.js` has a bug visible to the user.
 
 ## Version Reference
 
-| Field | Location | Example |
+| Field | Location | Current value (v12.9.1) |
 |---|---|---|
-| Backend version | `Config.js` → `APP_META.BACKEND_VERSION` | `12.9.0` |
-| Backend label | `Config.js` → `APP_META.BACKEND_LABEL` | `v12.9 Project Cleanup` |
-| Cache key | `Config.js` → `API_SECURITY.SUMMARY_CACHE_KEY` | `finance_summary_v12_9` |
-| Frontend version | `script.js` → `APP_FRONTEND_VERSION` | `12.9.0` |
-| Session key name | `script.js` → `FINANCE_OS_API_KEY_STORAGE` | `finance_os_session_secret_v12_9` |
+| Backend version | `Config.js` → `APP_META.BACKEND_VERSION` | `12.9.1` |
+| Backend label | `Config.js` → `APP_META.BACKEND_LABEL` | `v12.9.1 Bug fixes: zero-balance display, goal validation, API log status` |
+| Release date | `Config.js` → `APP_META.RELEASE_DATE` | `2026-05-28` |
+| Cache key | `Config.js` → `API_SECURITY.SUMMARY_CACHE_KEY` | `finance_summary_v12_9_1` |
+| Frontend version | `script.js` → `APP_FRONTEND_VERSION` | `12.9.0` (frontend unchanged) |
 
-All five must be updated together on every backend release.
+All five backend fields must be updated together on every backend release.
