@@ -49,6 +49,10 @@ function recordTransaction(data) {
       const sheet = getRequiredSheet_(ss, APP_CONFIG.SHEET_SAVINGS);
       const action = normalizeSavingsActionStrict_(data.action);
       const goalName = cleanText_(data.goalName) || cleanText_(data.item) || 'Emergency Fund 100k';
+      const knownGoals = getGoalNames_();
+      if (knownGoals.length && knownGoals.indexOf(goalName) === -1) {
+        throw new Error('ชื่อ Goal/Item ไม่ตรงกับ Settings: ' + goalName);
+      }
       const deposit = action === 'Withdrawal' ? 0 : amount;
       const withdrawal = action === 'Withdrawal' ? amount : 0;
       const balance = getSavingsBalanceBefore_(sheet, goalName) + deposit - withdrawal;
