@@ -178,8 +178,8 @@
 
   function refreshAll() {
     setRefreshState(true);
-    // Performance v12.5: load only dashboard-critical data on first refresh.
-    // Categories/recent are lazy-loaded when opening Add/History.
+    loadCategories();
+    loadRecentTransactions();
     loadFinancialStatus(() => setRefreshState(false));
   }
 
