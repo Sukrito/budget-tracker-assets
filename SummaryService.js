@@ -182,12 +182,12 @@ function getFinancialSummary() {
 
     summary.openingCashBalance = getAccountOpeningBalanceByType_('Cash');
     summary.availableCash = getAccountCurrentBalanceByType_('Cash');
-    if (!summary.availableCash) {
+    if (summary.availableCash === undefined || summary.availableCash === null) {
       summary.availableCash = summary.openingCashBalance + summary.fcf;
     }
 
     summary.investmentCurrent = getAccountCurrentBalanceByType_('Investment');
-    if (!summary.investmentCurrent) {
+    if (summary.investmentCurrent === undefined || summary.investmentCurrent === null) {
       summary.investmentCurrent = getInvestmentCurrentValue_();
     }
 
