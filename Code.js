@@ -106,13 +106,13 @@ function doPost(e) {
 
     if (action === 'updateTransaction') {
       const result = updateTransaction(data && data.transactionId, data && data.data);
-      logApiAccess_(action, 'POST', 'success', 'updateTransaction', e);
+      logApiAccess_(action, 'POST', result.status === 'error' ? 'error' : 'success', 'updateTransaction', e);
       return apiJsonOutput_(result);
     }
 
     if (action === 'deleteTransaction') {
       const result = deleteTransaction(data && data.transactionId);
-      logApiAccess_(action, 'POST', 'success', 'deleteTransaction', e);
+      logApiAccess_(action, 'POST', result.status === 'error' ? 'error' : 'success', 'deleteTransaction', e);
       return apiJsonOutput_(result);
     }
 
