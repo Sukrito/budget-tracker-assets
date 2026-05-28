@@ -135,11 +135,11 @@
   }
 
   let systemCategories = {
-    Income: [],
-    Expenses: [],
-    Savings: [],
-    Investments: [],
-    savingsGoals: [],
+    Income: ['Salary', 'Side income', 'Other'],
+    Expenses: ['Food', 'Transport', 'Medical/Pet', 'Other'],
+    Savings: ['Emergency fund', 'Other'],
+    Investments: ['Money Market', 'Fund/ETF', 'Thai Stock', 'Other'],
+    savingsGoals: ['Emergency Fund 100k'],
     savingsActions: ['Deposit', 'Withdrawal'],
     investmentActions: ['Buy', 'DCA', 'Sell', 'Withdraw', 'Dividend', 'Fee']
   };
