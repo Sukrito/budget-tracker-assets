@@ -7,9 +7,12 @@ This project is used as a personal finance operating system for tracking income,
 ## Current Repository Structure
 
 budget-tracker-assets/
-- gas/        Apps Script runtime source pushed by clasp
+- index.html  GitHub Pages frontend — PWA shell
+- script.js   GitHub Pages frontend — application logic
+- styles.css  GitHub Pages frontend — styles
+- gas/        Apps Script backend source — pushed by clasp (rootDir: gas)
 - docs/       Project documentation and deployment notes
-- assets/     Icons and static assets not pushed to Apps Script
+- assets/     Icons and static assets
 - CLAUDE.md   Claude Code project guidance
 - README.md
 - .gitignore
@@ -19,9 +22,7 @@ budget-tracker-assets/
 
 ### gas/
 
-This folder contains the actual Apps Script project source.
-
-Only files inside gas/ should be pushed to Apps Script.
+This folder contains the Apps Script backend source. `clasp push` uploads only this folder (`.clasp.json` uses `rootDir: gas`).
 
 Main files include:
 
@@ -33,9 +34,11 @@ Main files include:
 - SummaryService.js — dashboard and financial summary logic
 - RecentService.js — recent transaction data
 - SystemCheckService.js — health/system check logic
-- index.html — web app shell
-- script.js — frontend application logic
 - appsscript.json — Apps Script manifest
+
+### GitHub Pages frontend
+
+`index.html`, `script.js`, and `styles.css` live at the repo root and are served by GitHub Pages. These files are never pushed to Apps Script.
 
 ### docs/
 
@@ -111,8 +114,9 @@ This prevents documentation, assets, Git files, and Claude files from being push
 
 ## Files That Should Not Be Pushed to Apps Script
 
-These should stay outside Apps Script runtime:
+Because `.clasp.json` uses `rootDir: gas`, only `gas/` is uploaded. The following never reach Apps Script:
 
+- index.html, script.js, styles.css (GitHub Pages frontend — served from repo root)
 - docs/
 - assets/
 - CLAUDE.md
